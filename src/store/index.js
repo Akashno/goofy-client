@@ -8,7 +8,9 @@ export default new Vuex.Store({
     isSongPlaying :false,
     isKeyboardPlaying :false,
     isRainPlaying :false,
-    isFullScreen:false
+    isFullScreen:false,
+    isNotePad:false,
+    isNotePadInFullScreen:false
   },
   getters: {
     isSongPlaying(state){
@@ -23,6 +25,12 @@ export default new Vuex.Store({
     isFullScreen(state){
       return state.isRainPlaying
     },
+    isNotePad(state){
+      return state.isNotePad
+    },
+    isNotePadInFullScreen(state){
+      return state.isNotePadInFullScreen
+    }
   },
   mutations: {
     toggleIsSongPlaying(state){
@@ -36,6 +44,14 @@ export default new Vuex.Store({
     },
     toggleIsFullScreen(state){
       state.isFullScreen = !state.isFullScreen
-    }
+    },
+    toggleIsNotePad(state){
+      state.isNotePad = !state.isNotePad
+      state.isNotePadInFullScreen=false 
+    },
+    openNotePadInFullScreen(state){
+      state.isNotePad = !state.isNotePadInFullScreen
+      state.isNotePadInFullScreen= !state.isNotePadInFullScreen
+    },
   },
 })

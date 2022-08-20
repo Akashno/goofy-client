@@ -5,7 +5,7 @@
     aria-modal="true"
   >
     <div
-      class="fixed inset-0 bg-gray-800 bg-opacity-40 transition-opacity"
+      class="fixed inset-0 bg-gray-900 bg-opacity-30 transition-opacity"
       aria-hidden="true"
     ></div>
     <div
@@ -45,23 +45,42 @@
         role="listbox"
       >
         <li
+          tabindex="0"
           @mouseenter="setActive(command)"
           :class="{ 'bg-gray-200': command.isActive }"
-          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex  items-center"
+          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex items-center"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
-          tabindex="-1"
           v-for="(command, index) in filteredCommands"
           :key="index"
         >
-
-          <component v-if="command.icon"  :is="command.icon" class="mr-2 " :size="14" />
+          <component
+            v-if="command.icon"
+            :is="command.icon"
+            class="mr-2"
+            :size="14"
+          />
           <span>{{ command.title }}</span>
         </li>
       </ul>
-
-      <div>..</div>
+      <span class="text-xs" v-if="!filteredCommands.length"
+        >No matching results</span
+      >
+      <div class="text-xs text-right pr-4 py-3 flex justify-between">
+        <div class="text-xs text-right pl-4 text-gray-400">
+          Press ctrl + p to close pallet
+        </div>
+        <div class="flex items-center space-x-3 font-bold">
+          <span class="font-normal">Use </span>
+          <span class="bg-gray-200 px-2 py-0.5">↓</span>
+          <span class="bg-gray-200 px-2 py-0.5">↑</span>
+          <span class="font-normal">or</span>
+          <span class="bg-gray-200 px-2 py-0.5">k</span>
+          <span class="bg-gray-200 px-2 py-0.5">j</span>
+          <span class="font-normal"> to navigate</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -72,6 +91,7 @@ import Pause from "vue-material-design-icons/Pause.vue";
 import Keyboard from "vue-material-design-icons/Keyboard.vue";
 import Cloud from "vue-material-design-icons/Cloud.vue";
 import FullScreen from "vue-material-design-icons/Fullscreen.vue";
+import Pencil from "vue-material-design-icons/Pencil.vue";
 
 export default {
   components: {
@@ -80,6 +100,7 @@ export default {
     Keyboard,
     Cloud,
     FullScreen,
+    Pencil,
   },
 
   data() {
@@ -91,22 +112,46 @@ export default {
           title: this.$store.getters.isSongPlaying ? "Pause Song" : "Play Song",
           func: this.playSong,
           isActive: true,
-          icon:this.$store.getters.isSongPlaying ? 'Pause':"Play"
+          icon: this.$store.getters.isSongPlaying ? "Pause" : "Play",
         },
         {
           id: 2,
-          title: "Keyboard sound ",
+          title: "Toggle: Keyboard sound ",
           func: this.toggleKeyboard,
           isActive: false,
-          icon:"Keyboard"
+          icon: "Keyboard",
         },
-        { id: 3, title: "Rain sound ", func: this.toggleRain, isActive: false,icon:'Cloud' },
+        {
+          id: 3,
+          title: "Toggle: Rain sound ",
+          func: this.toggleRain,
+          isActive: false,
+          icon: "Cloud",
+        },
         {
           id: 4,
           title: "View: Toggle Full Screen",
           func: this.toggleFullScreen,
           isActive: false,
-          icon:"FullScreen"
+          icon: "FullScreen",
+        },
+        {
+          id: 5,
+          title: this.$store.getters.isNotePad
+            ? "Close: Notepad"
+            : "Open: Notepad ",
+          func: this.toggleIsNotePad,
+          isActive: false,
+          icon: "Pencil",
+        },
+        {
+          id: 6,
+          title: this.$store.getters.isNotePadInFullScreen
+            ? "Toggle:Minimise Note Pad"
+            : "Toggle: FullScreen Notepad",
+          func: this.openNotePadInFullScreen,
+          isActive: false,
+          icon: "Pencil",
         },
       ],
       filteredCommands: [],
@@ -149,7 +194,7 @@ export default {
       });
     },
     setAciveCommand(e) {
-      if (e.key === "ArrowUp") {
+      if (e.key === "ArrowUp" || e.key === "k") {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
         this.filteredCommands[foundIndex].isActive = false;
@@ -159,14 +204,16 @@ export default {
           this.filteredCommands[
             this.filteredCommands.length - 1
           ].isActive = true;
+        return;
       }
-      if (e.key === "ArrowDown") {
+      if (e.key === "ArrowDown" || e.key === "j") {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
         this.filteredCommands[foundIndex].isActive = false;
         if (foundIndex + 1 < this.filteredCommands.length)
           this.filteredCommands[foundIndex + 1].isActive = true;
         else this.filteredCommands[0].isActive = true;
+        return;
       }
       if (e.key === "Enter") {
         this.commands.map((command) => {
@@ -174,14 +221,22 @@ export default {
             this.triggerFunc(command);
           }
         });
+        return;
       }
     },
     closeCommandPallet() {
       this.$emit("closeCommandPallet");
     },
+
     triggerFunc(command) {
       command.func();
       this.closeCommandPallet();
+    },
+    toggleIsNotePad() {
+      this.$store.commit("toggleIsNotePad");
+    },
+    openNotePadInFullScreen() {
+      this.$store.commit("openNotePadInFullScreen");
     },
     playSong() {
       this.$store.commit("toggleIsSongPlaying");
