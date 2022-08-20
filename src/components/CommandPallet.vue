@@ -47,7 +47,7 @@
         <li
           @mouseenter="setActive(command)"
           :class="{ 'bg-gray-200': command.isActive }"
-          class="cursor-default select-none px-4 py-2 hover:bg-gray-200"
+          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex  items-center"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
@@ -55,7 +55,9 @@
           v-for="(command, index) in filteredCommands"
           :key="index"
         >
-          {{ command.title }}
+
+          <component v-if="command.icon"  :is="command.icon" class="mr-2 " :size="14" />
+          <span>{{ command.title }}</span>
         </li>
       </ul>
 
@@ -65,24 +67,46 @@
 </template>
 
 <script>
+import Play from "vue-material-design-icons/Play.vue";
+import Pause from "vue-material-design-icons/Pause.vue";
+import Keyboard from "vue-material-design-icons/Keyboard.vue";
+import Cloud from "vue-material-design-icons/Cloud.vue";
+import FullScreen from "vue-material-design-icons/Fullscreen.vue";
+
 export default {
+  components: {
+    Play,
+    Pause,
+    Keyboard,
+    Cloud,
+    FullScreen,
+  },
+
   data() {
     return {
       filter: "",
       commands: [
-        { id: 1, title: "Play / Pause", func: this.playSong, isActive: false },
+        {
+          id: 1,
+          title: this.$store.getters.isSongPlaying ? "Pause Song" : "Play Song",
+          func: this.playSong,
+          isActive: true,
+          icon:this.$store.getters.isSongPlaying ? 'Pause':"Play"
+        },
         {
           id: 2,
           title: "Keyboard sound ",
           func: this.toggleKeyboard,
           isActive: false,
+          icon:"Keyboard"
         },
-        { id: 3, title: "Rain sound ", func: this.toggleRain, isActive: false },
+        { id: 3, title: "Rain sound ", func: this.toggleRain, isActive: false,icon:'Cloud' },
         {
           id: 4,
           title: "View: Toggle Full Screen",
           func: this.toggleFullScreen,
           isActive: false,
+          icon:"FullScreen"
         },
       ],
       filteredCommands: [],
@@ -147,17 +171,17 @@ export default {
       if (e.key === "Enter") {
         this.commands.map((command) => {
           if (command.isActive) {
-            this.triggerFunc(command)
+            this.triggerFunc(command);
           }
         });
       }
     },
-    closeCommandPallet(){
+    closeCommandPallet() {
       this.$emit("closeCommandPallet");
     },
     triggerFunc(command) {
       command.func();
-      this.closeCommandPallet()
+      this.closeCommandPallet();
     },
     playSong() {
       this.$store.commit("toggleIsSongPlaying");
