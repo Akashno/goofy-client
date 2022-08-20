@@ -45,40 +45,51 @@
         role="listbox"
       >
         <li
+          v-for="(command, index) in filteredCommands"
+          :key="index"
           tabindex="0"
           @mouseenter="setActive(command)"
           :class="{ 'bg-gray-200': command.isActive }"
-          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex items-center"
+          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex items-center justify-between"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
-          v-for="(command, index) in filteredCommands"
-          :key="index"
         >
-          <component
-            v-if="command.icon"
-            :is="command.icon"
-            class="mr-2"
-            :size="14"
-          />
-          <span>{{ command.title }}</span>
+          <div class="flex items-center">
+            <component
+              v-if="command.icon"
+              :is="command.icon"
+              class="mr-2"
+              :size="14"
+            />
+            <span>{{ command.title }}</span>
+          </div>
+          <div class="text-xs text-gray-400" v-show="command.isActive">
+            {{ command.description }}
+          </div>
         </li>
       </ul>
       <span class="text-xs" v-if="!filteredCommands.length"
         >No matching results</span
       >
       <div class="text-xs text-right pr-4 py-3 flex justify-between">
-        <div class="text-xs text-right pl-4 text-gray-400">
-          Press ctrl + p to close pallet
-        </div>
-        <div class="flex items-center space-x-3 font-bold">
+        <div
+          class="flex items-center space-x-3 font-bold text-xs text-right pl-4 text-gray-400 cursor-help"
+          title="use Arrow keys or k / j to navigate through commands"
+        >
           <span class="font-normal">Use </span>
-          <span class="bg-gray-200 px-2 py-0.5">↓</span>
-          <span class="bg-gray-200 px-2 py-0.5">↑</span>
+          <span class="">↓</span>
+          <span class="font-extrabold">↑</span>
           <span class="font-normal">or</span>
-          <span class="bg-gray-200 px-2 py-0.5">k</span>
-          <span class="bg-gray-200 px-2 py-0.5">j</span>
+          <span class="">k</span>
+          <span class="">j</span>
           <span class="font-normal"> to navigate</span>
+        </div>
+        <div
+          class="cursor-help text-xs text-right pl-4 text-gray-400"
+          title="Press / when you are not searching "
+        >
+          Press / to search
         </div>
       </div>
     </div>
@@ -92,7 +103,12 @@ import Keyboard from "vue-material-design-icons/Keyboard.vue";
 import Cloud from "vue-material-design-icons/Cloud.vue";
 import FullScreen from "vue-material-design-icons/Fullscreen.vue";
 import Pencil from "vue-material-design-icons/Pencil.vue";
+import Save from "vue-material-design-icons/Floppy.vue";
+import Clear from "vue-material-design-icons/Eraser.vue";
+import File from "vue-material-design-icons/File.vue";
+import Clipboard from "vue-material-design-icons/Clipboard.vue";
 
+import { mapGetters } from "vuex";
 export default {
   components: {
     Play,
@@ -101,8 +117,14 @@ export default {
     Cloud,
     FullScreen,
     Pencil,
+    Save,
+    Clear,
+    File,
+    Clipboard
   },
-
+  computed:{
+    ...mapGetters(['isSongPlaying'])
+  },
   data() {
     return {
       filter: "",
@@ -113,20 +135,29 @@ export default {
           func: this.playSong,
           isActive: true,
           icon: this.$store.getters.isSongPlaying ? "Pause" : "Play",
+          description: this.$store.getters.isSongPlaying
+            ? "Pause current playing song"
+            : "Play current song",
+          show: true,
         },
         {
           id: 2,
-          title: "Toggle: Keyboard sound ",
+          title: this.$store.getters.isKeyboardPlaying ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
           func: this.toggleKeyboard,
           isActive: false,
           icon: "Keyboard",
+          description: "Play typing sound ",
+          show: true,
         },
         {
           id: 3,
-          title: "Toggle: Rain sound ",
+
+          title: this.$store.getters.isRainPlaying ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
           func: this.toggleRain,
           isActive: false,
           icon: "Cloud",
+          description: "Play rain sound",
+          show: true,
         },
         {
           id: 4,
@@ -134,6 +165,7 @@ export default {
           func: this.toggleFullScreen,
           isActive: false,
           icon: "FullScreen",
+          show: true,
         },
         {
           id: 5,
@@ -143,6 +175,10 @@ export default {
           func: this.toggleIsNotePad,
           isActive: false,
           icon: "Pencil",
+          description: this.$store.getters.isNotePad
+            ? ""
+            : "Open and focus on notepad",
+          show: true,
         },
         {
           id: 6,
@@ -152,6 +188,54 @@ export default {
           func: this.openNotePadInFullScreen,
           isActive: false,
           icon: "Pencil",
+          description: this.$store.getters.isNotePadInFullScreen
+            ? ""
+            : "Open notepad in Full screen mode",
+          show: true,
+        },
+        {
+          id: 7,
+          title: "Save your note",
+          func: this.saveToNotes,
+          isActive: false,
+          icon: "Save",
+          show: this.$store.getters.note,
+        },
+        {
+          id: 8,
+          title: "Clear Note",
+          func: this.clearNote,
+          isActive: false,
+          icon: "Clear",
+          description: "Clear Current focused note",
+          show: this.$store.getters.note,
+        },
+        {
+          id: 9,
+          title:this.$store.getters.isMyNotes ? "Hide My Notes":  "Show My notes",
+          func: this.openMyNotes,
+          isActive: false,
+          icon: "File",
+          description:this.$store.getters.isMyNotes ? "Hide your Note history from display":  "Focus on your note history",
+          show:true
+        },
+        {
+          id: 10,
+          title:"Focus On Notepad",
+          func: this.focusOnNotePad,
+          isActive: false,
+          icon: "File",
+          description:"Focus cursor to notepad",
+          show:this.$store.getters.isNotePad
+        },
+        {
+          id: 10,
+          title:"Copy to clipboard",
+          func: this.copyToClipBoard,
+          isActive: false,
+          icon: "Clipboard",
+          description:"Copy current note to clipboard",
+          show:this.$store.getters.note
         },
       ],
       filteredCommands: [],
@@ -159,23 +243,15 @@ export default {
   },
   watch: {
     filter: {
-      handler(val) {
-        if (val === " ") this.filteredCommands = this.commands.splice(2, 3);
-        this.filteredCommands = this.commands
-          .filter((command) => {
-            command.isActive = false;
-            return command.title.toLowerCase().includes(val.toLowerCase());
-          })
-          .sort((a, b) => (a < b ? 1 : -1));
-        if (this.filteredCommands.length)
-          this.filteredCommands[0].isActive = true;
+      handler() {
+        this.setFilteredCommand()
       },
     },
   },
 
   mounted() {
     this.$refs.commandInput.focus();
-    this.filteredCommands = this.commands;
+    this.setFilteredCommand()
     window.addEventListener("keydown", this.setAciveCommand, { passive: true });
   },
   beforeDestroy() {
@@ -185,6 +261,19 @@ export default {
   },
 
   methods: {
+    setFilteredCommand(){
+        this.filteredCommands = this.commands
+          .filter((command) => {
+            command.isActive = false;
+            return (
+              command.title.toLowerCase().includes(this.filter.toLowerCase()) &&
+              command.show
+            );
+          })
+          .sort((a, b) => (a < b ? 1 : -1));
+        if (this.filteredCommands.length)
+          this.filteredCommands[0].isActive = true;
+    },
     setActive(com) {
       this.filteredCommands.map((command) => {
         command.isActive = false;
@@ -194,6 +283,11 @@ export default {
       });
     },
     setAciveCommand(e) {
+      if (e.key === "/") {
+        setTimeout(() => {
+          this.$refs.commandInput.focus();
+        }, 0.1);
+      }
       if (e.key === "ArrowUp" || e.key === "k") {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
@@ -225,13 +319,13 @@ export default {
       }
     },
     closeCommandPallet() {
-      this.$emit("closeCommandPallet");
+       this.$store.commit('hideCommandPallet')
     },
-
     triggerFunc(command) {
       command.func();
       this.closeCommandPallet();
     },
+    //commands
     toggleIsNotePad() {
       this.$store.commit("toggleIsNotePad");
     },
@@ -249,6 +343,21 @@ export default {
     },
     toggleFullScreen() {
       this.$store.commit("toggleIsFullScreen");
+    },
+    saveToNotes() {
+      this.$emit("saveToNotes");
+    },
+    clearNote() {
+      this.$store.commit("clearNote");
+    },
+    openMyNotes(){
+      this.$store.commit("toggleIsMyNotes");
+    },
+    focusOnNotePad(){
+        this.$emit('focusOnNotePad')
+    },
+    copyToClipBoard(){
+       this.$emit('copyToClipBoard')
     },
   },
 };

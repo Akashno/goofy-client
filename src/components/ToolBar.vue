@@ -1,6 +1,7 @@
 <template>
  <div class="flex justify-between w-full align-middle items-center mx-auto ">
-        <div class="cursor-pointer bg-gray-900 bg-opacity-50 p-2 rounded-lg"  @click="$emit('showTodo')">
+
+       <div class="cursor-pointer bg-gray-900 bg-opacity-50 p-2 rounded-lg"  @click="$emit('showTodo')">
           <img src="../assets/pencil.png" width="15" alt="" />
       </div>
       <div class="flex-grow flex justify-center">
@@ -13,6 +14,9 @@
           <img v-else src="../assets/pause.png" alt="" class="w-12" />
         </span>
       </div>
+       <span @click="$store.commit('toggleCommandPallet')" class="bg-gray-900 p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer" title="Press Ctrl + p ">
+          <HelpCircleOutline fillColor="white" :size="16"/>
+        </span>
       <!-- Volume button -->
       <div class="flex space-x-4 align-middle">
         <span class="cursor-pointer">
@@ -119,10 +123,13 @@
 
 <script>
 import { mapState } from 'vuex';
-
+import HelpCircleOutline from "vue-material-design-icons/HelpCircleOutline.vue"
 import Player from "../methods/Player";
 export default {
     name:"ToolBar",
+    components:{
+    HelpCircleOutline
+    },
     data(){
      return{
       primary: new Player("primary"),

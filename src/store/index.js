@@ -5,12 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    isCommandPallet:false,
     isSongPlaying :false,
     isKeyboardPlaying :false,
     isRainPlaying :false,
     isFullScreen:false,
     isNotePad:false,
-    isNotePadInFullScreen:false
+    isNotePadInFullScreen:false,
+    isMyNotes:false,
+    note:"",
+
   },
   getters: {
     isSongPlaying(state){
@@ -30,6 +34,18 @@ export default new Vuex.Store({
     },
     isNotePadInFullScreen(state){
       return state.isNotePadInFullScreen
+    },
+    note(state){
+      return state.note
+    },
+    isMyNotes(state){
+      return state.isMyNotes
+    },
+    isCommandPallet(state){
+      return state.isCommandPallet
+    },
+    fontSize(state){
+      return state.fontSize
     }
   },
   mutations: {
@@ -46,12 +62,39 @@ export default new Vuex.Store({
       state.isFullScreen = !state.isFullScreen
     },
     toggleIsNotePad(state){
+      state.isMyNotes = !state.isNotePad
       state.isNotePad = !state.isNotePad
       state.isNotePadInFullScreen=false 
     },
     openNotePadInFullScreen(state){
-      state.isNotePad = !state.isNotePadInFullScreen
+      state.isNotePad =true 
       state.isNotePadInFullScreen= !state.isNotePadInFullScreen
     },
+    setNote(state,payload){
+      state.note= payload
+    },
+    clearNote(state){
+      state.note = ""
+    },
+    toggleCommandPallet(state){
+      state.isCommandPallet = !state.isCommandPallet 
+    },
+
+    showCommandPallet(state){
+      state.isCommandPallet =true 
+    },
+    hideCommandPallet(state){
+      state.isCommandPallet =false 
+    },
+    toggleIsMyNotes(state){
+      if(!state.isMyNotes){
+      state.isNotePadInFullScreen = true 
+      state.isNotePad = true
+      state.isMyNotes = true 
+      }
+      else{
+      state.isMyNotes =false 
+      }
+    }
   },
 })

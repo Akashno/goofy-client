@@ -4,10 +4,12 @@
     class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
     :style="{ backgroundImage: 'url(' + require('@/assets/lofi2.gif') + ')' }"
   >
+  
     <CommandPallet
-      v-if="showCommandPallet"
-      @closeCommandPallet="showCommandPallet = false"
-      @keydown.esc="showCommandPallet = false"
+      v-if="isCommandPallet"
+      @focusOnNotePad="focusOnNotePad"
+      @saveToNotes="saveToNotes"
+      @copyToClipBoard="copyToClipBoard"
     />
     <div
       v-if="isNotePad"
@@ -19,21 +21,22 @@
       >
         <div class="flex h-full p-3">
           <textarea
-            class="bg-transparent w-full p-2 text-xs outline-none focus:outline-none placeholder-gray-50 overflow-hidden text-justify h-full"
+            class="bg-transparent text-xs w-full p-2 outline-none focus:outline-none placeholder-gray-50 overflow-hidden text-justify h-full"
             placeholder="Write something"
+            :value="this.$store.getters.note"
             spellcheck="false"
             ref="noteArea"
-            v-model="note"
+            @input="setNote"
             :style="`font-family:${selectedFont}`"
             autofocus
           ></textarea>
-          <span v-show="!noteHistory && isNotePadInFullScreen" class="cursor-pointer">
+          <span v-show="!isMyNotes && isNotePadInFullScreen" class="cursor-pointer">
             <img
               width="20px"
               src="../assets/history.png"
               alt=""
               class="ml-auto"
-              @click="noteHistory = !noteHistory"
+              @click="toggleIsMyNotes"
             />
           </span>
         </div>
@@ -42,7 +45,7 @@
             <SelectFont @setFont="setFont" class="mr-4" v-if="isNotePadInFullScreen" />
             <!-- <Emoji @setEmoji="setEmoji" class="mr-4" v-if="isNotePadInFullScreen" /> -->
             <span
-              @click="copyToClipboard()"
+              @click="copyToClipBoard()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
               :class="isNotePadInFullScreen ? 'text-xs' : 'text-x'"
             >
@@ -83,7 +86,7 @@
       <div
         v-show="isNotePadInFullScreen"
         class="h-100 noteHistory"
-        :class="noteHistory ? 'border-l-2 border-gray-500 w-1/4 p-3 ' : 'w-0 '"
+        :class="isMyNotes ? 'border-l-2 border-gray-500 w-1/4 p-3 ' : 'w-0 '"
       >
         <span class="cursor-pointer">
           <img
@@ -91,7 +94,7 @@
             src="../assets/history.png"
             alt=""
             class="ml-auto"
-            @click="noteHistory = !noteHistory"
+            @click="toggleIsMyNotes"
           />
         </span>
         <div
@@ -99,7 +102,7 @@
           class="text-xs mb-2 hover:text-gray-50 text-gray-400 cursor-pointer"
           v-for="(note, index) in notes"
           :key="index"
-          v-show="noteHistory"
+          v-show="isMyNotes"
         >
           <div class="flex">
             <span>
@@ -142,11 +145,13 @@ export default {
   mounted() {
     window.addEventListener("keydown", (e) => {
       if (e.key === "p" && e.ctrlKey === true) {
-        this.showCommandPallet = !this.showCommandPallet;
+        this.$store.commit('toggleCommandPallet')
         e.preventDefault();
       }
       if (e.key === "Escape") {
-        this.showCommandPallet = false;
+        e.preventDefault()
+        this.$store.commit('hideCommandPallet')
+
       }
     });
   },
@@ -159,54 +164,45 @@ export default {
           },500)
         }
       }
-    }
+    },
+    note:{
+      handler(){
+        this.focusOnNotePad()
+      }
+    },
   },
   computed: {
-    ...mapState(["isNotePad", "isNotePadInFullScreen"]),
+    ...mapState(["isNotePad", "isNotePadInFullScreen","note","isMyNotes","isCommandPallet","fontize"]),
   },
   data() {
     return {
-      showCommandPallet: true,
       notes: [],
-      noteHistory: false,
+     input:"",
+     showAlert:false,
       isFullScreen: false,
       selectedFont: null,
-      note: "",
-      showBrightness: true,
-      brightness: `bg-opacity-30`,
     };
   },
   methods: {
+    focusOnNotePad(){
+      setTimeout(()=>{
+     this.$refs.noteArea.focus()
+      },10)
+    },
+    toggleIsMyNotes(){
+       this.$store.commit('toggleIsMyNotes')
+    },
     toggleIsNotePad(){
     this.$store.commit('toggleIsNotePad')
     },
     clearNote() {
-      this.note = "";
+      this.$store.commit('clearNote')
     },
     setCurrentNote(note) {
-      this.note = note.content;
+      this.$store.commit('setNote',note)
     },
-    setNoteBrightness(event) {
-      let index = event.target.value;
-      let data = [
-        "0",
-        "5",
-        "10",
-        "20",
-        "25",
-        "30",
-        "40",
-        "50",
-        "60",
-        "70",
-        "75",
-        "80",
-        "90",
-        "95",
-        "100",
-      ];
-      this.brightness = `bg-opacity-${data.at(index)}`;
-      console.log(this.brightness, index);
+    setNote(e){
+      this.$store.commit('setNote',e.target.value)
     },
     saveToNotes() {
       if (!this.note) return;
@@ -214,8 +210,8 @@ export default {
         title: this.note.slice(0, 20),
         content: this.note,
       });
-      this.noteHistory = true;
-      this.note = "";
+      this.$store.commit('setNote',"")
+      this.focusOnNotePad()
     },
     toggleFullScreen() {
       var element = document.querySelector("#wrapper");
@@ -230,15 +226,16 @@ export default {
     setEmoji(emoji) {
       this.note += emoji;
     },
-    copyToClipboard() {
-      this.$refs.noteArea.focus();
-      this.$refs.noteArea.setSelectionRange(0, this.note.length);
+    copyToClipBoard() {
+      debugger
+      this.focusOnNotePad()
+      this.$refs.noteArea.setSelectionRange(0,this.note.length);
       document.execCommand("copy");
       this.$refs.noteArea.setSelectionRange(this.note.length, this.note.length);
     },
     makeNoteFullScreen() {
       this.$store.commit('openNotePadInFullScreen')
-      this.$refs.noteArea.focus();
+      this.focusOnNotePad()
     },
   },
 };
