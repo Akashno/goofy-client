@@ -85,26 +85,26 @@
       </div>
       <div
         v-show="isNotePadInFullScreen"
-        class="h-100 noteHistory"
-        :class="isMyNotes ? 'border-l-2 border-gray-500 w-1/4 p-3 ' : 'w-0 '"
+        class="h-100 noteHistory "
+        :class="isMyNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
       >
-        <span class="cursor-pointer">
+        <div class="cursor-pointer mb-2">
           <img
             width="20px"
             src="../assets/history.png"
             alt=""
-            class="ml-auto"
+            class="ml-auto mr-3"
             @click="toggleIsMyNotes"
           />
-        </span>
+        </div>
         <div
           @click="setCurrentNote(note)"
-          class="text-xs mb-2 hover:text-gray-50 text-gray-400 cursor-pointer"
+          class="text-xs  hover:bg-gray-400 hover:bg-opacity-30  hover:text-gray-50 text-gray-400 cursor-pointer"
           v-for="(note, index) in notes"
           :key="index"
           v-show="isMyNotes"
         >
-          <div class="flex">
+          <div class="flex border-b-2 border-gray-500 p-2 ">
             <span>
               <img width="15px" src="../assets/file.png" alt="" class="mr-1" />
             </span>
@@ -176,7 +176,7 @@ export default {
   },
   data() {
     return {
-      notes: [],
+      notes: [{ "title":'hey',content:"sample note" },{ "title":'This is my second boo',content:"sample second note hehehe " }],
      input:"",
      showAlert:false,
       isFullScreen: false,
@@ -199,7 +199,7 @@ export default {
       this.$store.commit('clearNote')
     },
     setCurrentNote(note) {
-      this.$store.commit('setNote',note)
+      this.$store.commit('setNote',note.content)
     },
     setNote(e){
       this.$store.commit('setNote',e.target.value)
