@@ -22,7 +22,7 @@
             @mouseleave="primary.showSlider = false"
           >
             <input
-            v-if="primary.showSlider"
+              v-if="primary.showSlider"
               id="default-range"
               type="range"
               min="0"
@@ -30,7 +30,7 @@
               @input="slideVolume('primary')"
               v-model="primary.volume"
               step="0.01"
-              class="fixed bottom-20 right-44"
+               class="fixed bottom-20 right-44 "
               orient="vertical"
             />
             <span @click="toggleMute()" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
@@ -118,6 +118,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 
 import Player from "../methods/Player";
 export default {
@@ -127,10 +128,34 @@ export default {
       primary: new Player("primary"),
       rain: new Player("rain"),
       type: new Player("type"),
-      isFullScreen: false,
       audio:
-        "https://s3.us-east-2.amazonaws.com/lofi.co/lofi.co/tracks/chill/chill_4.mp3",
+        "https://dl.dropboxusercontent.com/s/8hylbfylsbyx4xl/Deep%20End.mp3?dl=0",
         }
+    },
+    watch:{
+       isFullScreen:{
+        handler(){
+          this.toggleFullScreen()
+        }
+       },
+       isSongPlaying:{
+        handler(){
+          this.playPause('primary')
+        }
+       },
+       isKeyboardPlaying:{
+        handler(){
+          this.playPause('type')
+        }
+       },
+       isRainPlaying:{
+        handler(){
+          this.playPause('rain')
+        }
+       }
+    },
+    computed:{
+      ...mapState(['isSongPlaying','isRainPlaying','isKeyboardPlaying','isFullScreen'])
     },
     methods:{
     toggleFullScreen() {

@@ -3,12 +3,11 @@
     id="wrapper"
     class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
           :style="{ backgroundImage: 'url(' + require('@/assets/lofi2.gif') + ')' }">
-
-  >
+          <CommandPallet v-if="showCommandPallet" @closeCommandPallet="showCommandPallet = false" @keydown.esc="showCommandPallet = false"/>
     <div
       v-if="showTodo"
-      class="transparentNoteWrapper bg-opacity-60 bg-gray-900 rounded-lg flex"
-      :class="noteFullScreen ? ' w-full h-full' : 'w-64 h-64'"
+      class="transparentNoteWrapper  bg-gray-900 rounded-lg flex bg-opacity-50"
+      :class="noteFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
         class="border-white w-full h-full text-white flex flex-col justify-between"
@@ -23,7 +22,7 @@
             :style="`font-family:${selectedFont}`"
             autofocus
           ></textarea>
-          <span v-show="!noteHistory && noteFullScreen" class="cursor-pointer">
+          <span v-show="!noteHistory && noteFullScreen" class="cursor-pointer ">
             <img
               width="20px"
               src="../assets/history.png"
@@ -44,6 +43,13 @@
             >
               copy
             </span>
+       <span
+              @click="clearNote()"
+              class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
+              :class="noteFullScreen ? 'text-xs' : 'text-x'"
+            >
+            clear
+            </span>
             <span
               @click="saveToNotes()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg"
@@ -51,17 +57,20 @@
               <img src="../assets/save.png" :width="noteFullScreen ? '14' : '8'" alt="" />
             </span>
           </div>
-
+          
+          <div class=" p-2"
+          >
+          
           <span
             @click="makeNoteFullScreen()"
-            class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
+            class="cursor-pointer bg-gray-900  bg-opacity-30 rounded-lg"
           >
             <img
               src="../assets/fullscreen.png"
               :width="noteFullScreen ? '14' : '8'"
-              alt=""
             />
           </span>
+          </div>
         </div>
       </div>
       <div
@@ -90,7 +99,7 @@
 
             <img
               width="15px"
-              src="file.png"
+              src="../assets/file.png"
               alt=""
               class="mr-1"
             />
@@ -115,6 +124,7 @@
 </template>
 <script>
 import Emoji from "../components/EmojiPicker";
+import CommandPallet from "../components/CommandPallet";
 import SelectFont from "../components/SelectFont";
 import ToolBar from "../components/ToolBar";
 export default {
@@ -122,30 +132,57 @@ export default {
   components: {
     Emoji,
     SelectFont,
-    ToolBar
+    ToolBar,
+    CommandPallet
+  },
+  mounted(){
+   window.addEventListener('keydown',(e)=>{
+  if(e.key === 'p' && e.ctrlKey === true ){
+    this.showCommandPallet = !this.showCommandPallet
+    e.preventDefault()
+  }
+  if(e.key==='Escape'){
+    this.showCommandPallet = false
+  }
+
+  })
   },
   data() {
     return {
       showTodo: false,
+      showCommandPallet:true,
       noteFullScreen: false,
       notes: [],
       noteHistory: false,
       isFullScreen: false,
       selectedFont: null,
       note: "",
+      showBrightness:true,
+      brightness:`bg-opacity-30`,
     };
   },
   methods: {
+    clearNote(){
+    this.note = ""
+    },
     setCurrentNote(note){
-      debugger
       this.note =note.content 
+    },
+    setNoteBrightness(event){
+      let index = event.target.value
+      let data = ['0','5','10','20','25','30','40','50','60','70','75','80','90','95','100']
+      this.brightness = `bg-opacity-${data.at(index)}` 
+      console.log(this.brightness,index)
 
     },
     saveToNotes() {
+      if(!this.note) return 
       this.notes.push({
         title: this.note.slice(0,20),
         content: this.note,
       });
+      this.noteHistory = true
+      this.note = ''
     },
     toggleFullScreen() {
       var element = document.querySelector("#wrapper");
