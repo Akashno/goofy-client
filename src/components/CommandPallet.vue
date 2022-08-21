@@ -315,9 +315,10 @@ export default {
       },
     },
   },
-
   mounted() {
+     setTimeout(()=>{
     this.$refs.commandInput.focus();
+     },0.1)
     this.setFilteredCommand();
     window.addEventListener("keydown", this.setActiveCommand, {
       passive: true,

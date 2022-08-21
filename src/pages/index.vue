@@ -185,8 +185,9 @@ export default {
       this.$store.commit('saveToNotes')
     },
     toggleIsFullScreen() {
-      var element = document.querySelector("#wrapper");
-      !this.$store.state.isFullScreen ? document.exitFullscreen() : element.requestFullscreen();
+       var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+       var element = document.querySelector("#wrapper");
+       fullscreenElement ?  document.exitFullscreen() : element.requestFullscreen();
     },
     setFont(selectedFont) {
       this.selectedFont = selectedFont;
