@@ -7,4 +7,5 @@ export default class Note {
     this.isSavedNotes = false
     this.savedNotes = [{ "title":'hey',content:"sample note" },{ "title":'This is my second boo',content:"sample second note hehehe " }]
   }
+  
 }

@@ -40,7 +40,7 @@
                class="fixed bottom-20 right-44 "
               orient="vertical"
             />
-            <span @click="toggleMute('primary')" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
+            <span @click="this.$store.commit('toggleMute',player)" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
               <img
                 src="../assets/sound.png"
                 width="15"
@@ -116,9 +116,10 @@
         <!-- Full Screen button -->
         <div class="h-16 flex justify-end align-middle relative items-center">
           <span
-            @click="toggleIsFullScreen()"
+            @click="this.$store.commit('toggleIsFullScreen')"
             class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
           >
+
             <img src="../assets/fullscreen.png" width="15" alt="" />
           </span>
         </div>
@@ -162,12 +163,6 @@ export default {
        },
     },
     methods:{
-    toggleIsFullScreen() {
-      this.$store.commit("toggleIsFullScreen");
-    },
-    toggleMute(player) {
-      this.$store.commit('toggleMute',player)
-    },
     mutePlayer(player){
       this.$refs[player].muted = this[player].muted;
     },
@@ -186,7 +181,7 @@ export default {
       } else {
         this.$refs[player].pause();
       }
-    }
+      }
     }
 
 }

@@ -77,6 +77,12 @@ export default new Vuex.Store({
       state.isCommandPallet = !state.isCommandPallet 
     },
 
+    showCommandPallet(state){
+      state.isCommandPallet =true 
+    },
+    hideCommandPallet(state){
+      state.isCommandPallet =false 
+    },
     toggleIsSavedNotes(state){
       if(!state.theNote.isSavedNotes){
       state.theNote.isFullScreen = true 
@@ -89,13 +95,6 @@ export default new Vuex.Store({
     },
     toggleIsFullScreen(state){
       state.isFullScreen = !state.isFullScreen
-    },
-    showCommandPallet(state){
-      state.isCommandPallet =true 
-    },
-    hideCommandPallet(state){
-     state.isCommandPallet =false 
-    },
-
+    }
   },
 })
