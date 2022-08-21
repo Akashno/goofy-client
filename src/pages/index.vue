@@ -12,7 +12,7 @@
     />
     <div
       v-if="note.isOpened"
-      class="transparentNoteWrapper bg-primary bg-opacity-60 rounded-lg flex "
+      class="transparentNoteWrapper bg-primary bg-opacity-60 saturate-200 rounded-lg flex "
       :class="note.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
@@ -236,6 +236,9 @@ export default {
 <style scoped>
 * {
   overflow: hidden;
+}
+#wrapper{
+  transition: background-image 2s;
 }
 .noteHistory {
   transition: width 0.2s linear !important;

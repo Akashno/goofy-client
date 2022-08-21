@@ -279,7 +279,7 @@ export default {
           title:this.$store.state.isDarkMode ?'Toggle: Light Mode' : "Toggle: Dark Mode" ,
           func: this.toggleDarkMode,
           isActive: false,
-          icon:this.$store.state.isDarkMode ? "Moon": "Sun",
+          icon:this.$store.state.isDarkMode ? "Sun": "Moon",
           show:true
         }
       ],
