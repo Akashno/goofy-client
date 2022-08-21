@@ -38,11 +38,12 @@
       role="alert"
     >
       <span class="font-semibold mr-2 text-left flex-auto text-x"
-        >Press Ctrl + P to open / close command pallet</span
+        >Press Ctrl + p to open / close command pallet</span
       >
     </div>
     <span
-      @click="showAlert = !showAlert"
+      @mouseenter="showAlert = true"
+      @mouseleave="showAlert = false"
       class="bg-primary p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer"
       title="Press Ctrl + p "
     >
@@ -185,15 +186,6 @@ export default {
     };
   },
   watch: {
-    showAlert: {
-      handler() {
-        if (this.showAlert) {
-          setTimeout(() => {
-            this.showAlert = false;
-          }, 5000);
-        }
-      },
-    },
     "primary.playing": function () {
       this.togglePlay("primary");
     },
