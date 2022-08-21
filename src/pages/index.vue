@@ -11,25 +11,26 @@
       @copyToClipBoard="copyToClipBoard"
     />
     <div
-      v-if="theNote.isOpened"
+      v-if="note.isOpened"
       class="transparentNoteWrapper bg-gray-900 rounded-lg flex bg-opacity-50"
-      :class="theNote.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
+      :class="note.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
         class="border-white w-full h-full text-white flex flex-col justify-between"
       >
         <div class="flex h-full p-3">
           <textarea
+          @blur="$store.commit('setFocusOnNotePad',false)"
             class="bg-transparent text-xs w-full p-2 outline-none focus:outline-none placeholder-gray-50 overflow-hidden text-justify h-full"
             placeholder="Write something"
-            :value="this.$store.getters.theNote.text"
+            :value="this.$store.state.note.text"
             spellcheck="false"
             ref="noteArea"
             @input="setNote"
             :style="`font-family:${selectedFont}`"
             autofocus
           ></textarea>
-          <span v-show="!theNote.isSavedNotes && theNote.isFullScreen" class="cursor-pointer">
+          <span v-show="!note.isSavedNotes && note.isFullScreen" class="cursor-pointer">
             <img
               width="20px"
               src="../assets/history.png"
@@ -41,18 +42,18 @@
         </div>
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center px-2">
-            <SelectFont @setFont="setFont" class="mr-4" v-if="theNote.isFullScreen" />
+            <SelectFont @setFont="setFont" class="mr-4" v-if="note.isFullScreen" />
             <span
               @click="copyToClipBoard()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
-              :class="theNote.isFullScreen ? 'text-xs' : 'text-x'"
+              :class="note.isFullScreen ? 'text-xs' : 'text-x'"
             >
               copy
             </span>
             <span
               @click="clearNote()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
-              :class="theNote.isFullScreen ? 'text-xs' : 'text-x'"
+              :class="note.isFullScreen ? 'text-xs' : 'text-x'"
             >
               clear
             </span>
@@ -62,7 +63,7 @@
             >
               <img
                 src="../assets/save.png"
-                :width="theNote.isFullScreen ? '14' : '8'"
+                :width="note.isFullScreen ? '14' : '8'"
                 alt=""
               />
             </span>
@@ -75,16 +76,16 @@
             >
               <img
                 src="../assets/fullscreen.png"
-                :width="theNote.isFullScreen ? '14' : '8'"
+                :width="note.isFullScreen ? '14' : '8'"
               />
             </span>
           </div>
         </div>
       </div>
       <div
-        v-show="theNote.isFullScreen"
+        v-show="note.isFullScreen"
         class="h-100 noteHistory "
-        :class="theNote.isSavedNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
+        :class="note.isSavedNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
       >
         <div class="cursor-pointer mb-2">
           <img
@@ -96,23 +97,24 @@
           />
         </div>
         <div
-          @click="setCurrentNote(note)"
+        :tabindex="index"
+          @click="setCurrentNote(item)"
           class="text-xs  hover:bg-gray-400 hover:bg-opacity-30  hover:text-gray-50 text-gray-400 cursor-pointer"
-          v-for="(note, index) in theNote.savedNotes"
+          v-for="(item, index) in note.savedNotes"
           :key="index"
-          v-show="theNote.isSavedNotes"
+          v-show="note.isSavedNotes"
         >
           <div class="flex   p-2 ">
             <span>
               <img width="15px" src="../assets/file.png" alt="" class="mr-1" />
             </span>
             <span>
-              {{ note.title }}
+              {{ item.title }}
             </span>
           </div>
         </div>
         <div
-          v-if="!theNote.savedNotes.length"
+          v-if="!note.savedNotes.length"
           class="text-gray-400 text-xs text-center mt-10"
         >
           Your saved notes will be shown here
@@ -121,7 +123,7 @@
     </div>
     <ToolBar
       @showTodo="toggleIsNotePad"
-      v-show="!theNote.isFullScreen"
+      v-show="!note.isFullScreen"
     />
   </div>
 </template>
@@ -146,30 +148,28 @@ export default {
         e.preventDefault();
       }
       if (e.key === "Escape") {
-        e.preventDefault()
         this.$store.commit('hideCommandPallet')
 
       }
     });
   },
   watch:{
-    "theNote.isOpened":function(){
-        if(this.theNote.isOpened){
+    "note.isFocused":function(){
+      if(this.note.isFocused){
+      this.focusOnNotePad()
+      }
+    },
+    "note.isOpened":function(){
+        if(this.note.isOpened){
           this.focusOnNotePad()
         }
     },
-    "theNote.text":{
-      handler(){
-        this.focusOnNotePad()
-      }
-    },
     "isFullScreen":function(){
       this.toggleIsFullScreen()
-
-    }
+    },
   },
   computed: {
-    ...mapState([ "isCommandPallet","fontize","theNote","isFullScreen"]),
+    ...mapState([ "isCommandPallet","fontize","note","isFullScreen"]),
   },
   data() {
     return {
@@ -181,8 +181,8 @@ export default {
   methods: {
     focusOnNotePad(){
       setTimeout(()=>{
-     this.$refs.noteArea.focus()
-      },10)
+        this.$refs.noteArea.focus()
+      },5)
     },
     toggleIsSavedNotes(){
        this.$store.commit('toggleIsSavedNotes')
@@ -194,19 +194,20 @@ export default {
       this.$store.commit('clearNote')
     },
     setCurrentNote(note) {
+      debugger
       this.$store.commit('setNote',note.content)
     },
     setNote(e){
       this.$store.commit('setNote',e.target.value)
     },
     saveToNotes() {
-      if (!this.$store.getters.theNote.text) return;
+      if (!this.$store.state.note.text) return;
       this.$store.commit('saveToNotes')
       this.focusOnNotePad()
     },
     toggleIsFullScreen() {
       var element = document.querySelector("#wrapper");
-      !this.$store.getters.isFullScreen ? document.exitFullscreen() : element.requestFullscreen();
+      !this.$store.state.isFullScreen ? document.exitFullscreen() : element.requestFullscreen();
     },
     setFont(selectedFont) {
       this.selectedFont = selectedFont;

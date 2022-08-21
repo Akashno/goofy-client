@@ -40,7 +40,7 @@
                class="fixed bottom-20 right-44 "
               orient="vertical"
             />
-            <span @click="this.$store.commit('toggleMute',player)" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
+            <span @click="$store.commit('toggleMute','primary')" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
               <img
                 src="../assets/sound.png"
                 width="15"
@@ -116,10 +116,9 @@
         <!-- Full Screen button -->
         <div class="h-16 flex justify-end align-middle relative items-center">
           <span
-            @click="this.$store.commit('toggleIsFullScreen')"
+            @click="$store.commit('toggleIsFullScreen')"
             class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
           >
-
             <img src="../assets/fullscreen.png" width="15" alt="" />
           </span>
         </div>
@@ -146,6 +145,9 @@ export default {
        "primary.playing":function(){
            this.togglePlay('primary')
        },
+       "primary.volume":function(){
+           this.setVolume('primary')
+       },
        "rain.playing":function(){
            this.togglePlay('rain')
        },
@@ -170,7 +172,10 @@ export default {
       let player = e.target.name
       let value = e.target.value
       this.$store.commit('setVolume',{player,value})
-       this.$refs[player].volume = value;
+      this.setVolume(player)
+    },
+    setVolume(player){
+       this.$refs[player].volume = this.$store.getters[player].volume;
     },
     playPause(player) {  //change player.playing value in store
       this.$store.commit('togglePlay',player)
@@ -181,7 +186,7 @@ export default {
       } else {
         this.$refs[player].pause();
       }
-      }
+    }
     }
 
 }

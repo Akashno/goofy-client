@@ -128,18 +128,18 @@ export default {
       commands: [
         {
           id: 1,
-          title: this.$store.getters.primary.playing ? "Pause Song" : "Play Song",
+          title: this.$store.state.primary.playing ? "Pause Song" : "Play Song",
           func: this.toggleSong,
           isActive: true,
-          icon: this.$store.getters.primary.playing ? "Pause" : "Play",
-          description: this.$store.getters.primary.playing
+          icon: this.$store.state.primary.playing ? "Pause" : "Play",
+          description: this.$store.state.primary.playing
             ? "Pause current playing song"
             : "Play current song",
           show: true,
         },
         {
           id: 2,
-          title: this.$store.getters.type.playing ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
+          title: this.$store.state.type.playing ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
           func: this.toggleKeyboard,
           isActive: false,
           icon: "Keyboard",
@@ -149,7 +149,7 @@ export default {
         {
           id: 3,
 
-          title: this.$store.getters.rain.playing ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
+          title: this.$store.state.rain.playing ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
           func: this.toggleRain,
           isActive: false,
           icon: "Cloud",
@@ -166,26 +166,26 @@ export default {
         },
         {
           id: 5,
-          title: this.$store.getters.theNote.isOpened
+          title: this.$store.state.note.isOpened
             ? "Close: Notepad"
             : "Open: Notepad ",
           func: this.toggleIsNotePad,
           isActive: false,
           icon: "Pencil",
-          description: this.$store.getters.theNote.isOpened
+          description: this.$store.state.note.isOpened
             ? ""
             : "Open and focus on notepad",
           show: true,
         },
         {
           id: 6,
-          title: this.$store.getters.theNote.isFullScreen
+          title: this.$store.state.note.isFullScreen
             ? "Toggle:Minimise Note Pad"
             : "Toggle: FullScreen Notepad",
           func: this.openNotePadInFullScreen,
           isActive: false,
           icon: "Pencil",
-          description: this.$store.getters.theNote.isFullScreen
+          description: this.$store.state.note.isFullScreen
             ? ""
             : "Open notepad in Full screen mode",
           show: true,
@@ -196,7 +196,7 @@ export default {
           func: this.saveToNotes,
           isActive: false,
           icon: "Save",
-          show: this.$store.getters.theNote.text,
+          show: this.$store.state.note.text,
         },
         {
           id: 8,
@@ -205,15 +205,15 @@ export default {
           isActive: false,
           icon: "Clear",
           description: "Clear Current focused note",
-          show: this.$store.getters.theNote.text,
+          show: this.$store.state.note.text,
         },
         {
           id: 9,
-          title:this.$store.getters.theNote.isSavedNotes ? "Hide My Notes":  "Show My notes",
+          title:this.$store.state.note.isSavedNotes ? "Hide My Notes":  "Show My notes",
           func: this.openMyNotes,
           isActive: false,
           icon: "File",
-          description:this.$store.getters.theNote.isSavedNotes ? "Hide your Note history from display":  "Focus on your note history",
+          description:this.$store.state.note.isSavedNotes ? "Hide your Note history from display":  "Focus on your note history",
           show:true
         },
         {
@@ -223,7 +223,7 @@ export default {
           isActive: false,
           icon: "File",
           description:"Focus cursor to notepad",
-          show:this.$store.getters.theNote.isOpened
+          show:this.$store.state.note.isOpened
         },
         {
           id: 11,
@@ -232,26 +232,44 @@ export default {
           isActive: false,
           icon: "Clipboard",
           description:"Copy current note to clipboard",
-          show:this.$store.getters.theNote.text
+          show:this.$store.state.note.text
         },
         {
           id: 12,
-          title: this.$store.getters.type.muted || this.$store.getters.type.volume === 0 ? "Keyboard: Unmute sound" : "Keyboard: Mute Sound",
+          title: this.$store.state.type.muted || this.$store.state.type.volume === 0 ? "Keyboard: Unmute sound" : "Keyboard: Mute Sound",
           func: this.muteKeyboard,
           isActive: false,
           icon: "Keyboard",
           description:"Mute the sound of typing",
-          show:this.$store.getters.type.playing && this.$store.getters.type.volume > 0
+          show:this.$store.state.type.playing && this.$store.state.type.volume > 0
         },
         {
           id: 13,
-          title: this.$store.getters.rain.muted || this.$store.getters.rain.volume === 0 ? "Rain: Unmute sound" : "Rain: Mute Sound",
+          title: this.$store.state.rain.muted || this.$store.state.rain.volume === 0 ? "Rain: Unmute sound" : "Rain: Mute Sound",
           func: this.muteRain,
           isActive: false,
           icon: "cloud",
           description:"Mute the sound of raining",
-          show:this.$store.getters.rain.playing && this.$store.getters.rain.volume > 0
+          show:this.$store.state.rain.playing && this.$store.state.rain.volume > 0
         },
+        {
+          id: 14,
+          title: "Song: Volume up" ,
+          func: this.songVolumeUp,
+          isActive: false,
+          icon: "cloud",
+          description:"Increase the sound of music by 0.5",
+          show:this.$store.state.primary.playing && this.$store.state.primary.volume < 1 
+        },
+        {
+          id: 15,
+          title: "Song: Volume Down" ,
+          func: this.songVolumeDown,
+          isActive: false,
+          icon: "cloud",
+          description:"Descrease the sound of music by 0.5",
+          show:this.$store.state.primary.playing && this.$store.state.primary.volume > 0
+        }
       ],
       //hehe
     };
@@ -267,10 +285,10 @@ export default {
   mounted() {
     this.$refs.commandInput.focus();
     this.setFilteredCommand()
-    window.addEventListener("keydown", this.setAciveCommand, { passive: true });
+    window.addEventListener("keydown", this.setActiveCommand, { passive: true });
   },
   beforeDestroy() {
-    window.removeEventListener("keydown", this.setAciveCommand, {
+    window.removeEventListener("keydown", this.setActiveCommand, {
       passive: true,
     });
   },
@@ -297,7 +315,7 @@ export default {
         }
       });
     },
-    setAciveCommand(e) {
+    setActiveCommand(e) {
       if (e.key === "/") {
         setTimeout(() => {
           this.$refs.commandInput.focus();
@@ -325,11 +343,8 @@ export default {
         return;
       }
       if (e.key === "Enter") {
-        this.commands.map((command) => {
-          if (command.isActive) {
-            this.triggerFunc(command);
-          }
-        });
+        let command = this.commands.find((command)=> command.isActive)
+        this.triggerFunc(command)
         return;
       }
     },
