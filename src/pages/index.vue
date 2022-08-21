@@ -4,9 +4,7 @@
     class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
     :style="{ backgroundImage:$store.state.isDarkMode ?'url(' + require('@/assets/lofi5.gif') + ')':  'url(' + require('@/assets/lofi2.gif') + ')' }"
   >
-    <CommandPallet
-      v-if="isCommandPallet"
-    />
+    <CommandPallet  v-if="isCommandPallet"  />
     <div
       v-if="note.isOpened"
       class="transparentNoteWrapper bg-primary bg-opacity-60 saturate-200 rounded-lg flex "
@@ -27,7 +25,7 @@
             :style="`font-family:${selectedFont}`"
             autofocus
           ></textarea>
-          <span v-show="!note.isSavedNotes && note.isFullScreen" class="cursor-pointer">
+          <span v-show=" note.isFullScreen" class="cursor-pointer">
             <img
               width="20px"
               src="../assets/history.png"
@@ -76,21 +74,12 @@
       <div
         v-show="note.isFullScreen"
         class="h-100 noteHistory "
-        :class="note.isSavedNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
+        :class="note.isSavedNotes ? 'border-l-2 bg-primary bg-opacity-40 border-gray-400 w-1/4 py-3 ' : 'w-0 '"
       >
-        <div class="cursor-pointer mb-2">
-          <img
-            width="20px"
-            src="../assets/history.png"
-            alt=""
-            class="ml-auto mr-3"
-            @click="toggleIsSavedNotes"
-          />
-        </div>
         <div
         :tabindex="index"
           @click="setCurrentNote(item)"
-          class="text-xs  hover:bg-gray-400 hover:bg-opacity-30  hover:text-gray-50 text-gray-400 cursor-pointer"
+          class="text-xs  hover:bg-gray-400 hover:bg-opacity-30  hover:text-gray-50 text-gray-50 cursor-pointer"
           v-for="(item, index) in note.savedNotes"
           :key="index"
           v-show="note.isSavedNotes"

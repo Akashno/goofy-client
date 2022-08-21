@@ -32,8 +32,8 @@
       <Moon v-else fillColor="white" :size="16" />
     </span>
     <div
-      :class="showAlert ? 'right-4 bottom-20' : '-right-48 bottom-20'"
-      style="transition : all 0.5s"
+      :class="showAlert ? 'right-4 bottom-20' : '-right-52 bottom-20'"
+      style="transition: all 0.5s"
       class="p-2 fixed bg-primary dark:bg-indigo-800 items-center text-indigo-100 leading-none lg:rounded-full flex lg:inline-flex clear-right"
       role="alert"
     >
@@ -185,16 +185,14 @@ export default {
     };
   },
   watch: {
-    showAlert:{
-      handler(){
-
-      if(this.showAlert){
-        setTimeout(()=>{
-         this.showAlert = false
-        },3000)
-      }
-      }
-
+    showAlert: {
+      handler() {
+        if (this.showAlert) {
+          setTimeout(() => {
+            this.showAlert = false;
+          }, 5000);
+        }
+      },
     },
     "primary.playing": function () {
       this.togglePlay("primary");

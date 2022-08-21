@@ -5,7 +5,7 @@
     aria-modal="true"
   >
     <div
-      class="mx-auto max-w-xl transform  overflow-hidden  rounded-xl bg-gray-100 dark:bg-primary shadow-2xl   transition-all "
+      class=" mx-auto max-w-xl transform overflow-hidden rounded-xl bg-gray-100 dark:bg-primary shadow-2xl transition-all"
     >
       <div class="relative">
         <svg
@@ -23,11 +23,13 @@
         </svg>
         <input
           v-model="filter"
+          @focus="isInputFocus = true"
+          @blur="isInputFocus = false"
           ref="commandInput"
           autofocus
           spellcheck="false"
           type="text"
-          class="focus:outline-none h-12 w-full border-0 bg-transparent pl-11 pr-4  dark:placeholder-gray-100 dark:text-gray-100 focus:ring-0 sm:text-sm"
+          class="focus:outline-none h-12 w-full border-0 bg-transparent pl-11 pr-4 dark:placeholder-gray-100 dark:text-gray-100 focus:ring-0 sm:text-sm"
           placeholder="Search..."
           role="combobox"
           aria-expanded="false"
@@ -45,9 +47,12 @@
           :key="index"
           :tabindex="index"
           :ref="`item${index}`"
-          @mouseenter="setActive(command)"
-          :class="{ 'dark:bg-gray-200 dark:text-primary bg-gray-800  text-white': command.isActive }"
-          class="focus:outline-none  cursor-default select-none px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-200 dark:hover:text-gray-800 hover:text-white flex items-center justify-between"
+          @mouseenter="setActiveOnHover(command)"
+          :class="{
+            'dark:bg-gray-200 dark:text-primary bg-gray-800  text-white':
+              command.isActive,
+          }"
+          class="focus:outline-none cursor-default select-none px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-200 dark:hover:text-gray-800 hover:text-white flex items-center justify-between"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
@@ -65,9 +70,8 @@
             {{ command.description }}
           </div>
         </li>
-
       </ul>
-      <span class="text-xs dark:text-gray-100 " v-if="!filteredCommands.length"
+      <span class="text-xs dark:text-gray-100" v-if="!filteredCommands.length"
         >No matching results</span
       >
       <div class="text-xs text-right pr-4 py-3 flex justify-between">
@@ -123,12 +127,13 @@ export default {
     Clipboard,
     Sun,
     Moon,
-    CommandPallet
+    CommandPallet,
   },
   data() {
     return {
       filter: "",
       filteredCommands: [],
+      isInputFocus: true,
       commands: [
         {
           id: 1,
@@ -143,7 +148,9 @@ export default {
         },
         {
           id: 2,
-          title: this.$store.state.type.playing ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
+          title: this.$store.state.type.playing
+            ? "Keyboard sound: Turn Off "
+            : " Keyboard sound: Turn On ",
           func: this.toggleKeyboard,
           isActive: false,
           icon: "Keyboard",
@@ -153,7 +160,9 @@ export default {
         {
           id: 3,
 
-          title: this.$store.state.rain.playing ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
+          title: this.$store.state.rain.playing
+            ? "Rain sound: Turn Off "
+            : " Rain sound: Turn On ",
           func: this.toggleRain,
           isActive: false,
           icon: "Cloud",
@@ -213,74 +222,88 @@ export default {
         },
         {
           id: 9,
-          title:this.$store.state.note.isSavedNotes ? "Hide My Notes":  "Show My notes",
+          title: this.$store.state.note.isSavedNotes
+            ? "Hide My Notes"
+            : "Show My notes",
           func: this.openMyNotes,
           isActive: false,
           icon: "File",
-          description:this.$store.state.note.isSavedNotes ? "Hide your Note history from display":  "Focus on your note history",
-          show:true
+          description: this.$store.state.note.isSavedNotes
+            ? "Hide your Note history from display"
+            : "Focus on your note history",
+          show: true,
         },
         {
           id: 10,
-          title:"Focus On Notepad",
+          title: "Focus On Notepad",
           func: this.focusOnNotePad,
           isActive: false,
           icon: "File",
-          description:"Focus cursor to notepad",
-          show:this.$store.state.note.isOpened
+          description: "Focus cursor to notepad",
+          show: this.$store.state.note.isOpened,
         },
         {
           id: 11,
-          title:"Close: Command pallet",
+          title: "Close: Command pallet",
           func: this.closeCommandPallet,
           isActive: false,
           icon: "CommandPallet",
-          description:"Close Command Pallet",
-          show:this.$store.state.isCommandPallet
+          description: "Close Command Pallet",
+          show: this.$store.state.isCommandPallet,
         },
         {
           id: 12,
-          title: this.$store.state.type.muted || this.$store.state.type.volume === 0 ? "Keyboard: Unmute sound" : "Keyboard: Mute Sound",
+          title:
+            this.$store.state.type.muted || this.$store.state.type.volume === 0
+              ? "Keyboard: Unmute sound"
+              : "Keyboard: Mute Sound",
           func: this.muteKeyboard,
           isActive: false,
           icon: "Keyboard",
-          description:"Mute the sound of typing",
-          show:this.$store.state.type.playing && this.$store.state.type.volume > 0
+          description: "Mute the sound of typing",
+          show:
+            this.$store.state.type.playing && this.$store.state.type.volume > 0,
         },
         {
           id: 13,
-          title: this.$store.state.rain.muted || this.$store.state.rain.volume === 0 ? "Rain: Unmute sound" : "Rain: Mute Sound",
+          title:
+            this.$store.state.rain.muted || this.$store.state.rain.volume === 0
+              ? "Rain: Unmute sound"
+              : "Rain: Mute Sound",
           func: this.muteRain,
           isActive: false,
           icon: "cloud",
-          description:"Mute the sound of raining",
-          show:this.$store.state.rain.playing && this.$store.state.rain.volume > 0
+          description: "Mute the sound of raining",
+          show:
+            this.$store.state.rain.playing && this.$store.state.rain.volume > 0,
         },
         {
           id: 14,
-          title: "Song: Volume up" ,
+          title: "Song: Volume up",
           func: this.songVolumeUp,
           isActive: false,
           icon: "cloud",
-          description:"Increase the sound of music by 0.5",
-          show:this.$store.getters.canIncreaseVolumeOfSong
+          description: "Increase the sound of music by 0.5",
+          show: this.$store.getters.canIncreaseVolumeOfSong,
         },
         {
           id: 15,
-          title: "Song: Volume Down" ,
+          title: "Song: Volume Down",
           func: this.songVolumeDown,
           isActive: false,
           icon: "cloud",
-          show:this.$store.getters.canLowerVolumeOfSong
+          show: this.$store.getters.canLowerVolumeOfSong,
         },
         {
           id: 16,
-          title:this.$store.state.isDarkMode ?'Toggle: Light Mode' : "Toggle: Dark Mode" ,
+          title: this.$store.state.isDarkMode
+            ? "Toggle: Light Mode"
+            : "Toggle: Dark Mode",
           func: this.toggleDarkMode,
           isActive: false,
-          icon:this.$store.state.isDarkMode ? "Sun": "Moon",
-          show:true
-        }
+          icon: this.$store.state.isDarkMode ? "Sun" : "Moon",
+          show: true,
+        },
       ],
       //hehe
     };
@@ -288,15 +311,17 @@ export default {
   watch: {
     filter: {
       handler() {
-        this.setFilteredCommand()
+        this.setFilteredCommand();
       },
     },
   },
 
   mounted() {
     this.$refs.commandInput.focus();
-    this.setFilteredCommand()
-    window.addEventListener("keydown", this.setActiveCommand, { passive: true });
+    this.setFilteredCommand();
+    window.addEventListener("keydown", this.setActiveCommand, {
+      passive: true,
+    });
   },
   beforeDestroy() {
     window.removeEventListener("keydown", this.setActiveCommand, {
@@ -305,72 +330,80 @@ export default {
   },
 
   methods: {
-    setFilteredCommand(){
-        this.filteredCommands = this.commands
-          .filter((command) => {
-            command.isActive = false;
-            return (
-              command.title.toLowerCase().includes(this.filter.toLowerCase()) &&
-              command.show
-            );
-          })
-          .sort((a, b) => (a < b ? 1 : -1));
-        if (this.filteredCommands.length)
-          this.filteredCommands[0].isActive = true;
+    setFilteredCommand() {
+      this.filteredCommands = this.commands
+        .filter((command) => {
+          command.isActive = false;
+          return (
+            command.title.toLowerCase().includes(this.filter.toLowerCase()) &&
+            command.show
+          );
+        })
+        .sort((a, b) => (a < b ? 1 : -1));
+      if (this.filteredCommands.length)
+        this.filteredCommands[0].isActive = true;
     },
-    setActive(com) {
-      this.filteredCommands.map((command,index) => {
-        command.isActive = false;
-        if (command.id === com.id) {
-          command.isActive = true;
-          let element = `item${index}`
-          this.$refs[element][0].focus()
-        }
+    setActiveOnHover(com) {
+      let foundIndex = this.filteredCommands.findIndex(
+        (command) => command.id === com.id
+      );
+      this.filteredCommands = this.filteredCommands.map((command, index) => {
+        return { ...command, isActive: foundIndex === index };
       });
+      this.focusOnItem(foundIndex);
+    },
+    focusOnItem(index) { //focus on item with ref value
+      let element = `item${index}`;
+      this.$refs[element][0].focus();
     },
     setActiveCommand(e) {
-      if (e.key === "/") {
-        setTimeout(() => {
-          this.$refs.commandInput.focus();
-        }, 0.1);
-      }
       if (e.key === "ArrowUp" || e.key === "k") {
-        this.$refs.commandInput.blur()
+        // Navigate on arrow up / arrow down / k / j
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
-
         this.filteredCommands[foundIndex].isActive = false;
-        if (foundIndex > 0){
+        if (foundIndex > 0) {
           this.filteredCommands[foundIndex - 1].isActive = true;
-          let element = `item${foundIndex-1}`
-          this.$refs[element][0].focus()
-        }
-        else
+          if (e.key === "ArrowUp" || !this.isInputFocus)
+            this.focusOnItem(foundIndex - 1);
+        } else {
           this.filteredCommands[
             this.filteredCommands.length - 1
           ].isActive = true;
+          if (e.key === "ArrowUp" || !this.isInputFocus)
+            this.focusOnItem(this.filteredCommands.length - 1);
+        }
         return;
       }
       if (e.key === "ArrowDown" || e.key === "j") {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
         this.filteredCommands[foundIndex].isActive = false;
-        if (foundIndex + 1 < this.filteredCommands.length){
-          let element = `item${foundIndex+1}`
-          this.$refs[element][0].focus()
+        if (foundIndex + 1 < this.filteredCommands.length) {
+          if (e.key === "ArrowDown" || !this.isInputFocus)
+            this.focusOnItem(foundIndex + 1);
           this.filteredCommands[foundIndex + 1].isActive = true;
+        } else {
+          this.filteredCommands[0].isActive = true;
+          if (e.key === "ArrowDown" || !this.isInputFocus) this.focusOnItem(0);
         }
-        else this.filteredCommands[0].isActive = true;
         return;
       }
-      if (e.key === "Enter") {
-        let command = this.commands.find((command)=> command.isActive)
-        this.triggerFunc(command)
+      if (e.key === "Enter") { //execute command on enter key
+        let command = this.commands.find((command) => command.isActive);
+        this.triggerFunc(command);
+        return;
+      }
+      if (e.key === "/") {
+        //  Search on slash
+        setTimeout(() => {
+          this.$refs.commandInput.focus();
+        }, 0.1);
         return;
       }
     },
     closeCommandPallet() {
-       this.$store.commit('hideCommandPallet')
+      this.$store.commit("hideCommandPallet");
     },
     triggerFunc(command) {
       command.func();
@@ -384,50 +417,53 @@ export default {
       this.$store.commit("openNotePadInFullScreen");
     },
     toggleSong() {
-      this.$store.commit("togglePlay",'primary');
+      this.$store.commit("togglePlay", "primary");
     },
     toggleKeyboard() {
-      this.$store.commit("togglePlay",'type');
+      this.$store.commit("togglePlay", "type");
     },
     toggleRain() {
-      this.$store.commit("togglePlay",'rain');
+      this.$store.commit("togglePlay", "rain");
     },
     toggleIsFullScreen() {
       this.$store.commit("toggleIsFullScreen");
     },
     saveToNotes() {
-      this.$store.commit('saveToNotes')
+      this.$store.commit("saveToNotes");
     },
     clearNote() {
       this.$store.commit("clearNote");
     },
-    openMyNotes(){
+    openMyNotes() {
       this.$store.commit("toggleIsSavedNotes");
     },
-    focusOnNotePad(){
-      this.$store.commit('setFocusOnNotePad',true)
+    focusOnNotePad() {
+      this.$store.commit("setFocusOnNotePad", true);
     },
-    muteKeyboard(){
-      this.$store.commit("toggleMute",'type')
+    muteKeyboard() {
+      this.$store.commit("toggleMute", "type");
     },
-    muteRain(){
-      this.$store.commit("toggleMute",'rain')
+    muteRain() {
+      this.$store.commit("toggleMute", "rain");
     },
-    songVolumeUp(){
-      this.$store.commit('setVolume',{player:'primary',
-      value:this.$store.state.primary.volume + 0.1 
-      })
+    songVolumeUp() {
+      this.$store.commit("setVolume", {
+        player: "primary",
+        value: this.$store.state.primary.volume + 0.1,
+      });
     },
-    songVolumeDown(){
-      this.$store.commit('setVolume',{player:'primary',
-      value:this.$store.state.primary.volume - 0.1 
-      })
+    songVolumeDown() {
+      this.$store.commit("setVolume", {
+        player: "primary",
+        value: this.$store.state.primary.volume - 0.1,
+      });
     },
-    toggleDarkMode(){
-      this.$store.commit('toggleDarkMode')
-    }
+    toggleDarkMode() {
+      this.$store.commit("toggleDarkMode");
+    },
   },
 };
 // copy to clipboard should be removed
 </script>
-<style></style>
+<style>
+</style>
