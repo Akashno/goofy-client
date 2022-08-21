@@ -1,13 +1,5 @@
 <template>
   <div
-    id="wrapper"
-    class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
-    :style="{ backgroundImage:$store.state.isDarkMode ?'url(' + require('@/assets/lofi5.gif') + ')':  'url(' + require('@/assets/lofi2.gif') + ')' }"
-  >
-    <CommandPallet
-      v-if="isCommandPallet"
-    />
-    <div
       v-if="note.isOpened"
       class="transparentNoteWrapper bg-primary bg-opacity-60 saturate-200 rounded-lg flex "
       :class="note.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
@@ -40,7 +32,13 @@
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center px-2">
             <SelectFont @setFont="setFont" class="mr-4" v-if="note.isFullScreen" />
-            
+            <span
+              @click="copyToClipBoard()"
+              class="cursor-pointer bg-primary p-2 bg-opacity-50 rounded-lg mr-4"
+              :class="note.isFullScreen ? 'text-xs' : 'text-x'"
+            >
+              copy
+            </span>
             <span
               @click="clearNote()"
               class="cursor-pointer bg-primary p-2 bg-opacity-50 rounded-lg mr-4"
@@ -112,120 +110,14 @@
         </div>
       </div>
     </div>
-    <ToolBar
-      v-show="!note.isFullScreen"
-    />
-  </div>
 </template>
-<script>
-import Emoji from "../components/EmojiPicker";
-import CommandPallet from "../components/CommandPallet";
-import SelectFont from "../components/SelectFont";
-import ToolBar from "../components/ToolBar";
-import { mapState } from "vuex";
-export default {
-  name: "IndexPage",
-  components: {
-    Emoji,
-    SelectFont,
-    ToolBar,
-    CommandPallet,
-  },
-  mounted() {
-    window.addEventListener("keydown", (e) => {
 
-      if (e.key === "p" && e.ctrlKey === true) {
-        this.$store.commit('toggleCommandPallet')
-        e.preventDefault();
-      }
-      if (e.key === "Escape") {
-        this.$store.commit('hideCommandPallet')
-      }
-      if (e.code === "Space") {
-        if(this.$store.getters.canToggleWithSpace ){
-        this.$store.commit('togglePlay','primary')
-        }
-      }
-    });
-  },
-  watch:{
-    "note.isFocused":function(){
-      if(this.note.isFocused){
-      this.focusOnNotePad()
-      }
-    },
-    "note.isOpened":function(){
-        if(this.note.isOpened){
-          this.focusOnNotePad()
-        }
-    },
-    "isFullScreen":function(){
-      this.toggleIsFullScreen()
-    },
-  },
-  computed: {
-    ...mapState([ "isCommandPallet","fontize","note","isFullScreen"]),
-  },
-  data() {
-    return {
-      input:"",
-      showAlert:false,
-      selectedFont: null,
-    };
-  },
-  methods: {
-    focusOnNotePad(){
-      setTimeout(()=>{
-        this.$refs.noteArea.focus()
-      },5)
-    },
-    toggleIsSavedNotes(){
-       this.$store.commit('toggleIsSavedNotes')
-    },
-    clearNote() {
-      this.$store.commit('clearNote')
-    },
-    setCurrentNote(note) {
-      debugger
-      this.$store.commit('setNote',note.content)
-    },
-    setNote(e){
-      this.$store.commit('setNote',e.target.value)
-    },
-    saveToNotes() {
-      this.$store.commit('saveToNotes')
-    },
-    toggleIsFullScreen() {
-      var element = document.querySelector("#wrapper");
-      !this.$store.state.isFullScreen ? document.exitFullscreen() : element.requestFullscreen();
-    },
-    setFont(selectedFont) {
-      this.selectedFont = selectedFont;
-    },
-    setEmoji(emoji) {
-      this.note += emoji;
-    },
-    makeNoteFullScreen() {
-      this.$store.commit('openNotePadInFullScreen')
-      this.focusOnNotePad()
-    },
-  },
-};
+<script>
+export default {
+
+}
 </script>
-<style scoped>
-* {
-  overflow: hidden;
-}
-#wrapper{
-  transition: background-image 2s;
-}
-.noteHistory {
-  transition: width 0.2s linear !important;
-}
-.transparentNoteWrapper {
-  transition: height 0.5s ease-in-out, width 0.5s ease-in-out;
-}
-textarea {
-  resize: none;
-}
+
+<style>
+
 </style>

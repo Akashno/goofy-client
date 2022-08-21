@@ -5,10 +5,6 @@
     aria-modal="true"
   >
     <div
-      class="fixed inset-0 bg-primary-900 bg-opacity-30 transition-opacity"
-      aria-hidden="true"
-    ></div>
-    <div
       class="mx-auto max-w-xl transform  overflow-hidden  rounded-xl bg-gray-100 dark:bg-primary shadow-2xl   transition-all "
     >
       <div class="relative">
@@ -47,10 +43,11 @@
         <li
           v-for="(command, index) in filteredCommands"
           :key="index"
-          tabindex="0"
+          :tabindex="index"
+          :ref="`item${index}`"
           @mouseenter="setActive(command)"
           :class="{ 'dark:bg-gray-200 dark:text-primary bg-gray-800  text-white': command.isActive }"
-          class="cursor-default select-none px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-200 dark:hover:text-gray-800 hover:text-white flex items-center justify-between"
+          class="focus:outline-none  cursor-default select-none px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-200 dark:hover:text-gray-800 hover:text-white flex items-center justify-between"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
@@ -110,6 +107,7 @@ import File from "vue-material-design-icons/File.vue";
 import Clipboard from "vue-material-design-icons/Clipboard.vue";
 import Sun from "vue-material-design-icons/WhiteBalanceSunny.vue";
 import Moon from "vue-material-design-icons/MoonWaningCrescent.vue";
+import CommandPallet from "vue-material-design-icons/AppleKeyboardCommand.vue";
 
 export default {
   components: {
@@ -124,7 +122,8 @@ export default {
     File,
     Clipboard,
     Sun,
-    Moon
+    Moon,
+    CommandPallet
   },
   data() {
     return {
@@ -163,7 +162,7 @@ export default {
         },
         {
           id: 4,
-          title: "View: Toggle Full Screen",
+          title: "Toggle: Window Full Screen",
           func: this.toggleIsFullScreen,
           isActive: false,
           icon: "FullScreen",
@@ -185,8 +184,8 @@ export default {
         {
           id: 6,
           title: this.$store.state.note.isFullScreen
-            ? "Toggle:Minimise Note Pad"
-            : "Toggle: FullScreen Notepad",
+            ? "Toggle: Minimise Notepad"
+            : "Toggle: Notepad Fullscreen",
           func: this.openNotePadInFullScreen,
           isActive: false,
           icon: "Pencil",
@@ -232,12 +231,12 @@ export default {
         },
         {
           id: 11,
-          title:"Copy to clipboard",
-          func: this.copyToClipBoard,
+          title:"Close: Command pallet",
+          func: this.closeCommandPallet,
           isActive: false,
-          icon: "Clipboard",
-          description:"Copy current note to clipboard",
-          show:this.$store.getters.hasValidNote 
+          icon: "CommandPallet",
+          description:"Close Command Pallet",
+          show:this.$store.state.isCommandPallet
         },
         {
           id: 12,
@@ -264,7 +263,7 @@ export default {
           isActive: false,
           icon: "cloud",
           description:"Increase the sound of music by 0.5",
-          show:this.$store.state.primary.playing && this.$store.state.primary.volume < 1 
+          show:this.$store.getters.canIncreaseVolumeOfSong
         },
         {
           id: 15,
@@ -272,7 +271,7 @@ export default {
           func: this.songVolumeDown,
           isActive: false,
           icon: "cloud",
-          show:true
+          show:this.$store.getters.canLowerVolumeOfSong
         },
         {
           id: 16,
@@ -320,10 +319,12 @@ export default {
           this.filteredCommands[0].isActive = true;
     },
     setActive(com) {
-      this.filteredCommands.map((command) => {
+      this.filteredCommands.map((command,index) => {
         command.isActive = false;
         if (command.id === com.id) {
           command.isActive = true;
+          let element = `item${index}`
+          this.$refs[element][0].focus()
         }
       });
     },
@@ -334,11 +335,16 @@ export default {
         }, 0.1);
       }
       if (e.key === "ArrowUp" || e.key === "k") {
+        this.$refs.commandInput.blur()
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
+
         this.filteredCommands[foundIndex].isActive = false;
-        if (foundIndex > 0)
+        if (foundIndex > 0){
           this.filteredCommands[foundIndex - 1].isActive = true;
+          let element = `item${foundIndex-1}`
+          this.$refs[element][0].focus()
+        }
         else
           this.filteredCommands[
             this.filteredCommands.length - 1
@@ -349,8 +355,11 @@ export default {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
         this.filteredCommands[foundIndex].isActive = false;
-        if (foundIndex + 1 < this.filteredCommands.length)
+        if (foundIndex + 1 < this.filteredCommands.length){
+          let element = `item${foundIndex+1}`
+          this.$refs[element][0].focus()
           this.filteredCommands[foundIndex + 1].isActive = true;
+        }
         else this.filteredCommands[0].isActive = true;
         return;
       }
@@ -387,7 +396,7 @@ export default {
       this.$store.commit("toggleIsFullScreen");
     },
     saveToNotes() {
-      this.$emit("saveToNotes");
+      this.$store.commit('saveToNotes')
     },
     clearNote() {
       this.$store.commit("clearNote");
@@ -396,10 +405,7 @@ export default {
       this.$store.commit("toggleIsSavedNotes");
     },
     focusOnNotePad(){
-        this.$emit('focusOnNotePad')
-    },
-    copyToClipBoard(){
-       this.$emit('copyToClipBoard')
+      this.$store.commit('setFocusOnNotePad',true)
     },
     muteKeyboard(){
       this.$store.commit("toggleMute",'type')
@@ -422,6 +428,6 @@ export default {
     }
   },
 };
+// copy to clipboard should be removed
 </script>
-
 <style></style>

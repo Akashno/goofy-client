@@ -19,6 +19,12 @@ export default new Vuex.Store({
 
   },
   getters: {
+    canLowerVolumeOfSong({primary}){
+      return primary.playing && primary.volume > 0 
+    },
+    canIncreaseVolumeOfSong({primary}){
+      return primary.playing && primary.volume < 1 
+    },
     hasValidNote(state){
      return state.note.text.length
     },
@@ -79,12 +85,14 @@ export default new Vuex.Store({
       note.isFocused = true
     },
     saveToNotes({note}){
+      if(note.text){
       note.savedNotes.push({
         title:note.text.slice(0,20),
         content:note.text
       })
       note.text = ""
       note.isFocused = true
+      }
     },
     toggleIsSavedNotes({note}){
       if(!note.isSavedNotes){
