@@ -17,35 +17,13 @@ export default new Vuex.Store({
 
   },
   getters: {
-    primary(state){
-      return state.primary
-    },
-    rain(state){
-      return state.rain
-    },
-    type(state){
-      return state.type
-    },
-    isFullScreen(state){
-      return state.isFullScreen
-    },
-    note(state){
-      return state.note
-    },
-    isCommandPallet(state){
-      return state.isCommandPallet
-    },
-    fontSize(state){
-      return state.fontSize
-    },
+
   },
   mutations: {
-
     //core
     toggleIsFullScreen(state){
       state.isFullScreen = !state.isFullScreen
     },
-
     //command pallet
     showCommandPallet(state){
       state.isCommandPallet =true 

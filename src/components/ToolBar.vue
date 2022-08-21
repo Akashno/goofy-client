@@ -175,13 +175,13 @@ export default {
       this.setVolume(player)
     },
     setVolume(player){
-       this.$refs[player].volume = this.$store.getters[player].volume;
+       this.$refs[player].volume = this.$store.state[player].volume;
     },
     playPause(player) {  //change player.playing value in store
       this.$store.commit('togglePlay',player)
     },
     togglePlay(player){  // toggle play attr in audio tag
-      if (this.$store.getters[player].playing) {
+      if (this.$store.state[player].playing) {
         this.$refs[player].play();
       } else {
         this.$refs[player].pause();
