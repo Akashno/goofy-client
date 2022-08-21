@@ -1,3 +1,5 @@
+import Note from '@/methods/Note'
+import Player from '@/methods/Player'
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -5,96 +7,95 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    primary:new Player('primary'),
+    rain:new Player('rain'),
+    type:new Player('type'),
+    theNote:new Note(),
+
     isCommandPallet:false,
-    isSongPlaying :false,
-    isKeyboardPlaying :false,
-    isRainPlaying :false,
     isFullScreen:false,
-    isNotePad:false,
-    isNotePadInFullScreen:false,
-    isMyNotes:false,
-    note:"",
 
   },
   getters: {
-    isSongPlaying(state){
-      return state.isSongPlaying
+    primary(state){
+      return state.primary
     },
-    isKeyboardPlaying(state){
-      return state.isKeyboardPlaying
+    rain(state){
+      return state.rain
     },
-    isRainPlaying(state){
-      return state.isRainPlaying
+    type(state){
+      return state.type
     },
     isFullScreen(state){
-      return state.isRainPlaying
+      return state.isFullScreen
     },
-    isNotePad(state){
-      return state.isNotePad
-    },
-    isNotePadInFullScreen(state){
-      return state.isNotePadInFullScreen
-    },
-    note(state){
-      return state.note
-    },
-    isMyNotes(state){
-      return state.isMyNotes
+    theNote(state){
+      return state.theNote
     },
     isCommandPallet(state){
       return state.isCommandPallet
     },
     fontSize(state){
       return state.fontSize
-    }
+    },
   },
   mutations: {
-    toggleIsSongPlaying(state){
-      state.isSongPlaying = !state.isSongPlaying
+    togglePlay(state,player){  
+      state[player].playing = !state[player].playing
     },
-    toggleIsKeyboardPlaying(state){
-      state.isKeyboardPlaying = !state.isKeyboardPlaying
+    setVolume(state,{player,value}){
+      state[player].playing = true
+      state[player].muted = false
+      state[player].volume = value
     },
-    toggleIsRainPlaying(state){
-      state.isRainPlaying = !state.isRainPlaying
-    },
-    toggleIsFullScreen(state){
-      state.isFullScreen = !state.isFullScreen
+    toggleMute(state,player){
+       state[player].muted = !state[player].muted
     },
     toggleIsNotePad(state){
-      state.isMyNotes = !state.isNotePad
-      state.isNotePad = !state.isNotePad
-      state.isNotePadInFullScreen=false 
+      state.theNote.isOpened = !state.theNote.isOpened 
+      state.theNote.isSavedNotes =  state.theNote.isOpened
+      state.theNote.isFullScreen = false 
     },
     openNotePadInFullScreen(state){
-      state.isNotePad =true 
-      state.isNotePadInFullScreen= !state.isNotePadInFullScreen
+      state.theNote.isOpened =true 
+      state.theNote.isFullScreen= !state.theNote.isFullScreen
     },
     setNote(state,payload){
-      state.note= payload
+      state.theNote.text= payload
     },
     clearNote(state){
-      state.note = ""
+      state.theNote.text = ""
+    },
+    saveToNotes(state){
+      state.theNote.savedNotes.push({
+        title:state.theNote.text.slice(0,20),
+        content:state.theNote.text
+      })
+      state.theNote.text = ""
     },
     toggleCommandPallet(state){
       state.isCommandPallet = !state.isCommandPallet 
     },
 
+    toggleIsSavedNotes(state){
+      if(!state.theNote.isSavedNotes){
+      state.theNote.isFullScreen = true 
+      state.theNote.isOpened = true
+      state.theNote.isSavedNotes = true 
+      }
+      else{
+      state.theNote.isSavedNotes =false 
+      }
+    },
+    toggleIsFullScreen(state){
+      state.isFullScreen = !state.isFullScreen
+    },
     showCommandPallet(state){
       state.isCommandPallet =true 
     },
     hideCommandPallet(state){
-      state.isCommandPallet =false 
+     state.isCommandPallet =false 
     },
-    toggleIsMyNotes(state){
-      if(!state.isMyNotes){
-      state.isNotePadInFullScreen = true 
-      state.isNotePad = true
-      state.isMyNotes = true 
-      }
-      else{
-      state.isMyNotes =false 
-      }
-    }
+
   },
 })

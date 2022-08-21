@@ -4,7 +4,6 @@
     class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
     :style="{ backgroundImage: 'url(' + require('@/assets/lofi2.gif') + ')' }"
   >
-  
     <CommandPallet
       v-if="isCommandPallet"
       @focusOnNotePad="focusOnNotePad"
@@ -12,9 +11,9 @@
       @copyToClipBoard="copyToClipBoard"
     />
     <div
-      v-if="isNotePad"
+      v-if="theNote.isOpened"
       class="transparentNoteWrapper bg-gray-900 rounded-lg flex bg-opacity-50"
-      :class="isNotePadInFullScreen ? ` w-full h-full` : `w-64 h-64`"
+      :class="theNote.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
         class="border-white w-full h-full text-white flex flex-col justify-between"
@@ -23,38 +22,37 @@
           <textarea
             class="bg-transparent text-xs w-full p-2 outline-none focus:outline-none placeholder-gray-50 overflow-hidden text-justify h-full"
             placeholder="Write something"
-            :value="this.$store.getters.note"
+            :value="this.$store.getters.theNote.text"
             spellcheck="false"
             ref="noteArea"
             @input="setNote"
             :style="`font-family:${selectedFont}`"
             autofocus
           ></textarea>
-          <span v-show="!isMyNotes && isNotePadInFullScreen" class="cursor-pointer">
+          <span v-show="!theNote.isSavedNotes && theNote.isFullScreen" class="cursor-pointer">
             <img
               width="20px"
               src="../assets/history.png"
               alt=""
               class="ml-auto"
-              @click="toggleIsMyNotes"
+              @click="toggleIsSavedNotes"
             />
           </span>
         </div>
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center px-2">
-            <SelectFont @setFont="setFont" class="mr-4" v-if="isNotePadInFullScreen" />
-            <!-- <Emoji @setEmoji="setEmoji" class="mr-4" v-if="isNotePadInFullScreen" /> -->
+            <SelectFont @setFont="setFont" class="mr-4" v-if="theNote.isFullScreen" />
             <span
               @click="copyToClipBoard()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
-              :class="isNotePadInFullScreen ? 'text-xs' : 'text-x'"
+              :class="theNote.isFullScreen ? 'text-xs' : 'text-x'"
             >
               copy
             </span>
             <span
               @click="clearNote()"
               class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
-              :class="isNotePadInFullScreen ? 'text-xs' : 'text-x'"
+              :class="theNote.isFullScreen ? 'text-xs' : 'text-x'"
             >
               clear
             </span>
@@ -64,7 +62,7 @@
             >
               <img
                 src="../assets/save.png"
-                :width="isNotePadInFullScreen ? '14' : '8'"
+                :width="theNote.isFullScreen ? '14' : '8'"
                 alt=""
               />
             </span>
@@ -77,16 +75,16 @@
             >
               <img
                 src="../assets/fullscreen.png"
-                :width="isNotePadInFullScreen ? '14' : '8'"
+                :width="theNote.isFullScreen ? '14' : '8'"
               />
             </span>
           </div>
         </div>
       </div>
       <div
-        v-show="isNotePadInFullScreen"
+        v-show="theNote.isFullScreen"
         class="h-100 noteHistory "
-        :class="isMyNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
+        :class="theNote.isSavedNotes ? 'border-l-2 border-gray-500 w-1/4 py-3 ' : 'w-0 '"
       >
         <div class="cursor-pointer mb-2">
           <img
@@ -94,17 +92,17 @@
             src="../assets/history.png"
             alt=""
             class="ml-auto mr-3"
-            @click="toggleIsMyNotes"
+            @click="toggleIsSavedNotes"
           />
         </div>
         <div
           @click="setCurrentNote(note)"
           class="text-xs  hover:bg-gray-400 hover:bg-opacity-30  hover:text-gray-50 text-gray-400 cursor-pointer"
-          v-for="(note, index) in notes"
+          v-for="(note, index) in theNote.savedNotes"
           :key="index"
-          v-show="isMyNotes"
+          v-show="theNote.isSavedNotes"
         >
-          <div class="flex border-b-2 border-gray-500 p-2 ">
+          <div class="flex   p-2 ">
             <span>
               <img width="15px" src="../assets/file.png" alt="" class="mr-1" />
             </span>
@@ -114,7 +112,7 @@
           </div>
         </div>
         <div
-          v-if="!notes.length"
+          v-if="!theNote.savedNotes.length"
           class="text-gray-400 text-xs text-center mt-10"
         >
           Your saved notes will be shown here
@@ -122,9 +120,8 @@
       </div>
     </div>
     <ToolBar
-      @toggleFullScreen="toggleFullScreen"
       @showTodo="toggleIsNotePad"
-      v-show="!isNotePadInFullScreen"
+      v-show="!theNote.isFullScreen"
     />
   </div>
 </template>
@@ -156,30 +153,28 @@ export default {
     });
   },
   watch:{
-    isNotePad:{
-      handler(){
-        if(this.isNotePad){
-          setTimeout(()=>{
-        this.$refs.noteArea.focus()
-          },500)
+    "theNote.isOpened":function(){
+        if(this.theNote.isOpened){
+          this.focusOnNotePad()
         }
-      }
     },
-    note:{
+    "theNote.text":{
       handler(){
         this.focusOnNotePad()
       }
     },
+    "isFullScreen":function(){
+      this.toggleIsFullScreen()
+
+    }
   },
   computed: {
-    ...mapState(["isNotePad", "isNotePadInFullScreen","note","isMyNotes","isCommandPallet","fontize"]),
+    ...mapState([ "isCommandPallet","fontize","theNote","isFullScreen"]),
   },
   data() {
     return {
-      notes: [{ "title":'hey',content:"sample note" },{ "title":'This is my second boo',content:"sample second note hehehe " }],
-     input:"",
-     showAlert:false,
-      isFullScreen: false,
+      input:"",
+      showAlert:false,
       selectedFont: null,
     };
   },
@@ -189,8 +184,8 @@ export default {
      this.$refs.noteArea.focus()
       },10)
     },
-    toggleIsMyNotes(){
-       this.$store.commit('toggleIsMyNotes')
+    toggleIsSavedNotes(){
+       this.$store.commit('toggleIsSavedNotes')
     },
     toggleIsNotePad(){
     this.$store.commit('toggleIsNotePad')
@@ -205,20 +200,13 @@ export default {
       this.$store.commit('setNote',e.target.value)
     },
     saveToNotes() {
-      if (!this.note) return;
-      this.notes.push({
-        title: this.note.slice(0, 20),
-        content: this.note,
-      });
-      this.$store.commit('setNote',"")
+      if (!this.$store.getters.theNote.text) return;
+      this.$store.commit('saveToNotes')
       this.focusOnNotePad()
     },
-    toggleFullScreen() {
+    toggleIsFullScreen() {
       var element = document.querySelector("#wrapper");
-      this.isFullScreen
-        ? document.exitFullscreen()
-        : element.requestFullscreen();
-      this.isFullScreen = !this.isFullScreen;
+      !this.$store.getters.isFullScreen ? document.exitFullscreen() : element.requestFullscreen();
     },
     setFont(selectedFont) {
       this.selectedFont = selectedFont;
@@ -227,7 +215,6 @@ export default {
       this.note += emoji;
     },
     copyToClipBoard() {
-      debugger
       this.focusOnNotePad()
       this.$refs.noteArea.setSelectionRange(0,this.note.length);
       document.execCommand("copy");

@@ -1,9 +1,11 @@
 <template>
  <div class="flex justify-between w-full align-middle items-center mx-auto ">
 
-       <div class="cursor-pointer bg-gray-900 bg-opacity-50 p-2 rounded-lg"  @click="$emit('showTodo')">
+   <div class="w-max md:w-48">
+       <div class="cursor-pointer w-max bg-gray-900 bg-opacity-50 p-2 rounded-lg"  @click="$emit('showTodo')">
           <img src="../assets/pencil.png" width="15" alt="" />
       </div>
+   </div>
       <div class="flex-grow flex justify-center">
         <audio loop ref="primary" :src="audio"></audio>
         <audio loop ref="type" src="../assets/keyboard.mp3"></audio>
@@ -26,18 +28,19 @@
             @mouseleave="primary.showSlider = false"
           >
             <input
+            name="primary"
               v-if="primary.showSlider"
               id="default-range"
               type="range"
               min="0"
               max="1"
-              @input="slideVolume('primary')"
-              v-model="primary.volume"
+              @input="slideVolume"
+              :value="primary.volume"
               step="0.01"
                class="fixed bottom-20 right-44 "
               orient="vertical"
             />
-            <span @click="toggleMute()" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
+            <span @click="toggleMute('primary')" class="bg-gray-900 p-2 rounded-lg bg-opacity-30">
               <img
                 src="../assets/sound.png"
                 width="15"
@@ -54,13 +57,14 @@
           @mouseleave="type.showSlider = false"
         >
           <input
+          name="type"
             v-if="type.showSlider"
             id="default-range"
             type="range"
             min="0"
             max="1"
-            @input="slideVolume('type')"
-            v-model="type.volume"
+            @input="slideVolume"
+            :value="type.volume"
             step="0.01"
               class="fixed bottom-20 right-32"
               orient="vertical"
@@ -73,7 +77,7 @@
               src="../assets/typing.png"
               width="15"
               alt=""
-              :class="{ 'opacity-50': !type.playing }"
+              :class="{ 'opacity-50': !type.playing || type.muted || type.volume <= 0 }"
             />
           </span>
         </div>
@@ -85,13 +89,14 @@
           @mouseleave="rain.showSlider = false"
         >
           <input
+          name="rain"
             v-if="rain.showSlider"
             id="default-range"
             type="range"
             min="0"
             max="1"
-            @input="slideVolume('rain')"
-            v-model="rain.volume"
+            @input="slideVolume"
+            :value="rain.volume"
             step="0.01"
               class="fixed bottom-20 right-20"
               orient="vertical"
@@ -104,14 +109,14 @@
               src="../assets/rain.png"
               width="17"
               alt=""
-              :class="{ 'opacity-50': !rain.playing }"
+              :class="{ 'opacity-50': !rain.playing || rain.muted || rain.volume <= 0 }"
             />
           </span>
         </div>
         <!-- Full Screen button -->
         <div class="h-16 flex justify-end align-middle relative items-center">
           <span
-            @click="toggleFullScreen()"
+            @click="toggleIsFullScreen()"
             class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
           >
             <img src="../assets/fullscreen.png" width="15" alt="" />
@@ -124,68 +129,64 @@
 <script>
 import { mapState } from 'vuex';
 import HelpCircleOutline from "vue-material-design-icons/HelpCircleOutline.vue"
-import Player from "../methods/Player";
 export default {
     name:"ToolBar",
     components:{
     HelpCircleOutline
     },
+    computed:{
+      ...mapState(['primary','rain','type'])
+    },
     data(){
      return{
-      primary: new Player("primary"),
-      rain: new Player("rain"),
-      type: new Player("type"),
-      audio:
-        "https://dl.dropboxusercontent.com/s/8hylbfylsbyx4xl/Deep%20End.mp3?dl=0",
-        }
+      audio: "https://s3.us-east-2.amazonaws.com/lofi.co/lofi.co/tracks/chill/chill_12.mp3"}
     },
     watch:{
-       isFullScreen:{
-        handler(){
-          this.toggleFullScreen()
-        }
+       "primary.playing":function(){
+           this.togglePlay('primary')
        },
-       isSongPlaying:{
-        handler(){
-          this.playPause('primary')
-        }
+       "rain.playing":function(){
+           this.togglePlay('rain')
        },
-       isKeyboardPlaying:{
-        handler(){
-          this.playPause('type')
-        }
+       "type.playing":function(){
+           this.togglePlay('type')
        },
-       isRainPlaying:{
-        handler(){
-          this.playPause('rain')
-        }
-       }
-    },
-    computed:{
-      ...mapState(['isSongPlaying','isRainPlaying','isKeyboardPlaying','isFullScreen'])
+       "primary.muted":function(){
+           this.mutePlayer('primary')
+       },
+       "rain.muted":function(){
+           this.mutePlayer('rain')
+       },
+       "type.muted":function(){
+           this.mutePlayer('type')
+       },
     },
     methods:{
-    toggleFullScreen() {
-        this.$emit('toggleFullScreen')
+    toggleIsFullScreen() {
+      this.$store.commit("toggleIsFullScreen");
     },
-    toggleMute() {
-      this.primary.muted = !this.primary.muted;
-      this.$refs.primary.muted = this.primary.muted;
+    toggleMute(player) {
+      this.$store.commit('toggleMute',player)
     },
-    slideVolume(player) {
-      this.$refs[player].play();
-      this[player].playing = true;
-      this.$refs[player].volume = this[player].volume;
+    mutePlayer(player){
+      this.$refs[player].muted = this[player].muted;
     },
-    playPause(player) {
-      if (this[player].playing) {
-        this.$refs[player].pause();
-        this[player].playing = false;
-      } else {
+    slideVolume(e) {
+      let player = e.target.name
+      let value = e.target.value
+      this.$store.commit('setVolume',{player,value})
+       this.$refs[player].volume = value;
+    },
+    playPause(player) {  //change player.playing value in store
+      this.$store.commit('togglePlay',player)
+    },
+    togglePlay(player){  // toggle play attr in audio tag
+      if (this.$store.getters[player].playing) {
         this.$refs[player].play();
-        this[player].playing = true;
+      } else {
+        this.$refs[player].pause();
       }
-    },
+    }
     }
 
 }

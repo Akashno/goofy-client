@@ -108,7 +108,6 @@ import Clear from "vue-material-design-icons/Eraser.vue";
 import File from "vue-material-design-icons/File.vue";
 import Clipboard from "vue-material-design-icons/Clipboard.vue";
 
-import { mapGetters } from "vuex";
 export default {
   components: {
     Play,
@@ -122,27 +121,25 @@ export default {
     File,
     Clipboard
   },
-  computed:{
-    ...mapGetters(['isSongPlaying'])
-  },
   data() {
     return {
       filter: "",
+      filteredCommands: [],
       commands: [
         {
           id: 1,
-          title: this.$store.getters.isSongPlaying ? "Pause Song" : "Play Song",
-          func: this.playSong,
+          title: this.$store.getters.primary.playing ? "Pause Song" : "Play Song",
+          func: this.toggleSong,
           isActive: true,
-          icon: this.$store.getters.isSongPlaying ? "Pause" : "Play",
-          description: this.$store.getters.isSongPlaying
+          icon: this.$store.getters.primary.playing ? "Pause" : "Play",
+          description: this.$store.getters.primary.playing
             ? "Pause current playing song"
             : "Play current song",
           show: true,
         },
         {
           id: 2,
-          title: this.$store.getters.isKeyboardPlaying ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
+          title: this.$store.getters.type.playing ? "Keyboard sound: Turn Off " : " Keyboard sound: Turn On " ,
           func: this.toggleKeyboard,
           isActive: false,
           icon: "Keyboard",
@@ -152,7 +149,7 @@ export default {
         {
           id: 3,
 
-          title: this.$store.getters.isRainPlaying ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
+          title: this.$store.getters.rain.playing ? "Rain sound: Turn Off " : " Rain sound: Turn On " ,
           func: this.toggleRain,
           isActive: false,
           icon: "Cloud",
@@ -162,33 +159,33 @@ export default {
         {
           id: 4,
           title: "View: Toggle Full Screen",
-          func: this.toggleFullScreen,
+          func: this.toggleIsFullScreen,
           isActive: false,
           icon: "FullScreen",
           show: true,
         },
         {
           id: 5,
-          title: this.$store.getters.isNotePad
+          title: this.$store.getters.theNote.isOpened
             ? "Close: Notepad"
             : "Open: Notepad ",
           func: this.toggleIsNotePad,
           isActive: false,
           icon: "Pencil",
-          description: this.$store.getters.isNotePad
+          description: this.$store.getters.theNote.isOpened
             ? ""
             : "Open and focus on notepad",
           show: true,
         },
         {
           id: 6,
-          title: this.$store.getters.isNotePadInFullScreen
+          title: this.$store.getters.theNote.isFullScreen
             ? "Toggle:Minimise Note Pad"
             : "Toggle: FullScreen Notepad",
           func: this.openNotePadInFullScreen,
           isActive: false,
           icon: "Pencil",
-          description: this.$store.getters.isNotePadInFullScreen
+          description: this.$store.getters.theNote.isFullScreen
             ? ""
             : "Open notepad in Full screen mode",
           show: true,
@@ -199,7 +196,7 @@ export default {
           func: this.saveToNotes,
           isActive: false,
           icon: "Save",
-          show: this.$store.getters.note,
+          show: this.$store.getters.theNote.text,
         },
         {
           id: 8,
@@ -208,15 +205,15 @@ export default {
           isActive: false,
           icon: "Clear",
           description: "Clear Current focused note",
-          show: this.$store.getters.note,
+          show: this.$store.getters.theNote.text,
         },
         {
           id: 9,
-          title:this.$store.getters.isMyNotes ? "Hide My Notes":  "Show My notes",
+          title:this.$store.getters.theNote.isSavedNotes ? "Hide My Notes":  "Show My notes",
           func: this.openMyNotes,
           isActive: false,
           icon: "File",
-          description:this.$store.getters.isMyNotes ? "Hide your Note history from display":  "Focus on your note history",
+          description:this.$store.getters.theNote.isSavedNotes ? "Hide your Note history from display":  "Focus on your note history",
           show:true
         },
         {
@@ -226,19 +223,37 @@ export default {
           isActive: false,
           icon: "File",
           description:"Focus cursor to notepad",
-          show:this.$store.getters.isNotePad
+          show:this.$store.getters.theNote.isOpened
         },
         {
-          id: 10,
+          id: 11,
           title:"Copy to clipboard",
           func: this.copyToClipBoard,
           isActive: false,
           icon: "Clipboard",
           description:"Copy current note to clipboard",
-          show:this.$store.getters.note
+          show:this.$store.getters.theNote.text
+        },
+        {
+          id: 12,
+          title: this.$store.getters.type.muted || this.$store.getters.type.volume === 0 ? "Keyboard: Unmute sound" : "Keyboard: Mute Sound",
+          func: this.muteKeyboard,
+          isActive: false,
+          icon: "Keyboard",
+          description:"Mute the sound of typing",
+          show:this.$store.getters.type.playing && this.$store.getters.type.volume > 0
+        },
+        {
+          id: 13,
+          title: this.$store.getters.rain.muted || this.$store.getters.rain.volume === 0 ? "Rain: Unmute sound" : "Rain: Mute Sound",
+          func: this.muteRain,
+          isActive: false,
+          icon: "cloud",
+          description:"Mute the sound of raining",
+          show:this.$store.getters.rain.playing && this.$store.getters.rain.volume > 0
         },
       ],
-      filteredCommands: [],
+      //hehe
     };
   },
   watch: {
@@ -332,16 +347,16 @@ export default {
     openNotePadInFullScreen() {
       this.$store.commit("openNotePadInFullScreen");
     },
-    playSong() {
-      this.$store.commit("toggleIsSongPlaying");
+    toggleSong() {
+      this.$store.commit("togglePlay",'primary');
     },
     toggleKeyboard() {
-      this.$store.commit("toggleIsKeyboardPlaying");
+      this.$store.commit("togglePlay",'type');
     },
     toggleRain() {
-      this.$store.commit("toggleIsRainPlaying");
+      this.$store.commit("togglePlay",'rain');
     },
-    toggleFullScreen() {
+    toggleIsFullScreen() {
       this.$store.commit("toggleIsFullScreen");
     },
     saveToNotes() {
@@ -351,7 +366,7 @@ export default {
       this.$store.commit("clearNote");
     },
     openMyNotes(){
-      this.$store.commit("toggleIsMyNotes");
+      this.$store.commit("toggleIsSavedNotes");
     },
     focusOnNotePad(){
         this.$emit('focusOnNotePad')
@@ -359,6 +374,12 @@ export default {
     copyToClipBoard(){
        this.$emit('copyToClipBoard')
     },
+    muteKeyboard(){
+      this.$store.commit("toggleMute",'type')
+    },
+    muteRain(){
+      this.$store.commit("toggleMute",'rain')
+    }
   },
 };
 </script>
