@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{'dark':$store.state.isDarkMode}">
     <router-view/>
   </div>
 </template>

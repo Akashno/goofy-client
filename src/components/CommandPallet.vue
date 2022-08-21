@@ -5,15 +5,15 @@
     aria-modal="true"
   >
     <div
-      class="fixed inset-0 bg-gray-900 bg-opacity-30 transition-opacity"
+      class="fixed inset-0 bg-primary-900 bg-opacity-30 transition-opacity"
       aria-hidden="true"
     ></div>
     <div
-      class="mx-auto max-w-xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all"
+      class="mx-auto max-w-xl transform  overflow-hidden  rounded-xl bg-gray-100 dark:bg-primary shadow-2xl   transition-all "
     >
       <div class="relative">
         <svg
-          class="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
+          class="pointer-events-none absolute top-3.5 left-4 h-5 w-5 dark:text-white"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -31,7 +31,7 @@
           autofocus
           spellcheck="false"
           type="text"
-          class="focus:outline-none h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 focus:ring-0 sm:text-sm"
+          class="focus:outline-none h-12 w-full border-0 bg-transparent pl-11 pr-4  dark:placeholder-gray-100 dark:text-gray-100 focus:ring-0 sm:text-sm"
           placeholder="Search..."
           role="combobox"
           aria-expanded="false"
@@ -40,7 +40,7 @@
       </div>
 
       <ul
-        class="max-h-72 text-left scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
+        class="max-h-72 text-left scroll-py-2 overflow-y-auto py-2 text-sm dark:text-white"
         id="options"
         role="listbox"
       >
@@ -49,8 +49,8 @@
           :key="index"
           tabindex="0"
           @mouseenter="setActive(command)"
-          :class="{ 'bg-gray-200': command.isActive }"
-          class="cursor-default select-none px-4 py-2 hover:bg-gray-200 flex items-center justify-between"
+          :class="{ 'dark:bg-gray-200 dark:text-primary bg-gray-800  text-white': command.isActive }"
+          class="cursor-default select-none px-4 py-2 hover:bg-gray-800 dark:hover:bg-gray-200 dark:hover:text-gray-800 hover:text-white flex items-center justify-between"
           @click="triggerFunc(command)"
           id="option-1"
           role="option"
@@ -64,12 +64,13 @@
             />
             <span>{{ command.title }}</span>
           </div>
-          <div class="text-xs text-gray-400" v-show="command.isActive">
+          <div class="text-xs text-gray-800" v-show="command.isActive">
             {{ command.description }}
           </div>
         </li>
+
       </ul>
-      <span class="text-xs" v-if="!filteredCommands.length"
+      <span class="text-xs dark:text-gray-100 " v-if="!filteredCommands.length"
         >No matching results</span
       >
       <div class="text-xs text-right pr-4 py-3 flex justify-between">
@@ -107,6 +108,8 @@ import Save from "vue-material-design-icons/Floppy.vue";
 import Clear from "vue-material-design-icons/Eraser.vue";
 import File from "vue-material-design-icons/File.vue";
 import Clipboard from "vue-material-design-icons/Clipboard.vue";
+import Sun from "vue-material-design-icons/WhiteBalanceSunny.vue";
+import Moon from "vue-material-design-icons/MoonWaningCrescent.vue";
 
 export default {
   components: {
@@ -119,7 +122,9 @@ export default {
     Save,
     Clear,
     File,
-    Clipboard
+    Clipboard,
+    Sun,
+    Moon
   },
   data() {
     return {
@@ -196,7 +201,7 @@ export default {
           func: this.saveToNotes,
           isActive: false,
           icon: "Save",
-          show: this.$store.state.note.text,
+          show: this.$store.getters.hasValidNote,
         },
         {
           id: 8,
@@ -205,7 +210,7 @@ export default {
           isActive: false,
           icon: "Clear",
           description: "Clear Current focused note",
-          show: this.$store.state.note.text,
+          show: this.$store.getters.hasValidNote,
         },
         {
           id: 9,
@@ -232,7 +237,7 @@ export default {
           isActive: false,
           icon: "Clipboard",
           description:"Copy current note to clipboard",
-          show:this.$store.state.note.text
+          show:this.$store.getters.hasValidNote 
         },
         {
           id: 12,
@@ -267,8 +272,15 @@ export default {
           func: this.songVolumeDown,
           isActive: false,
           icon: "cloud",
-          description:"Descrease the sound of music by 0.5",
-          show:this.$store.state.primary.playing && this.$store.state.primary.volume > 0
+          show:true
+        },
+        {
+          id: 16,
+          title:this.$store.state.isDarkMode ?'Toggle: Light Mode' : "Toggle: Dark Mode" ,
+          func: this.toggleDarkMode,
+          isActive: false,
+          icon:this.$store.state.isDarkMode ? "Moon": "Sun",
+          show:true
         }
       ],
       //hehe
@@ -394,6 +406,19 @@ export default {
     },
     muteRain(){
       this.$store.commit("toggleMute",'rain')
+    },
+    songVolumeUp(){
+      this.$store.commit('setVolume',{player:'primary',
+      value:this.$store.state.primary.volume + 0.1 
+      })
+    },
+    songVolumeDown(){
+      this.$store.commit('setVolume',{player:'primary',
+      value:this.$store.state.primary.volume - 0.1 
+      })
+    },
+    toggleDarkMode(){
+      this.$store.commit('toggleDarkMode')
     }
   },
 };

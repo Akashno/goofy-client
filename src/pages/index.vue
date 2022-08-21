@@ -2,7 +2,7 @@
   <div
     id="wrapper"
     class="flex p-4 justify-end bg-primary h-screen w-screen bg-cover bg-no-repeat flex-col"
-    :style="{ backgroundImage: 'url(' + require('@/assets/lofi2.gif') + ')' }"
+    :style="{ backgroundImage:$store.state.isDarkMode ?'url(' + require('@/assets/lofi5.gif') + ')':  'url(' + require('@/assets/lofi2.gif') + ')' }"
   >
     <CommandPallet
       v-if="isCommandPallet"
@@ -12,7 +12,7 @@
     />
     <div
       v-if="note.isOpened"
-      class="transparentNoteWrapper bg-gray-900 rounded-lg flex bg-opacity-50"
+      class="transparentNoteWrapper bg-primary bg-opacity-60 rounded-lg flex "
       :class="note.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
@@ -45,21 +45,21 @@
             <SelectFont @setFont="setFont" class="mr-4" v-if="note.isFullScreen" />
             <span
               @click="copyToClipBoard()"
-              class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
+              class="cursor-pointer bg-primary p-2 bg-opacity-50 rounded-lg mr-4"
               :class="note.isFullScreen ? 'text-xs' : 'text-x'"
             >
               copy
             </span>
             <span
               @click="clearNote()"
-              class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg mr-4"
+              class="cursor-pointer bg-primary p-2 bg-opacity-50 rounded-lg mr-4"
               :class="note.isFullScreen ? 'text-xs' : 'text-x'"
             >
               clear
             </span>
             <span
               @click="saveToNotes()"
-              class="cursor-pointer bg-gray-900 p-2 bg-opacity-50 rounded-lg"
+              class="cursor-pointer bg-primary p-2 bg-opacity-50 rounded-lg"
             >
               <img
                 src="../assets/save.png"
@@ -143,13 +143,18 @@ export default {
   },
   mounted() {
     window.addEventListener("keydown", (e) => {
+
       if (e.key === "p" && e.ctrlKey === true) {
         this.$store.commit('toggleCommandPallet')
         e.preventDefault();
       }
       if (e.key === "Escape") {
         this.$store.commit('hideCommandPallet')
-
+      }
+      if (e.code === "Space") {
+        if(this.$store.getters.canToggleWithSpace ){
+        this.$store.commit('togglePlay','primary')
+        }
       }
     });
   },

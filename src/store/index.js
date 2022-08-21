@@ -7,6 +7,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+
     primary:new Player('primary'),
     rain:new Player('rain'),
     type:new Player('type'),
@@ -14,15 +15,24 @@ export default new Vuex.Store({
 
     isCommandPallet:false,
     isFullScreen:false,
+    isDarkMode:true,
 
   },
   getters: {
-
+    hasValidNote(state){
+     return state.note.text.length
+    },
+    canToggleWithSpace(state){
+      return !state.note.isOpened  && !state.isCommandPallet
+    }
   },
   mutations: {
     //core
     toggleIsFullScreen(state){
       state.isFullScreen = !state.isFullScreen
+    },
+    toggleDarkMode(state){
+        state.isDarkMode = !state.isDarkMode
     },
     //command pallet
     showCommandPallet(state){
@@ -34,7 +44,6 @@ export default new Vuex.Store({
     toggleCommandPallet(state){
       state.isCommandPallet = !state.isCommandPallet 
     },
-
     //player
     togglePlay(state,player){  
       state[player].playing = !state[player].playing

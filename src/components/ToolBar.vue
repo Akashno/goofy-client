@@ -16,7 +16,11 @@
           <img v-else src="../assets/pause.png" alt="" class="w-12" />
         </span>
       </div>
-       <span @click="$store.commit('toggleCommandPallet')" class="bg-gray-900 p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer" title="Press Ctrl + p ">
+       <span @click="$store.commit('toggleDarkMode')" class="bg-primary p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer" title="Press Ctrl + p ">
+          <Sun v-if="$store.state.isDarkMode" fillColor="white" :size="16"/>
+          <Moon v-else fillColor="white" :size="16"/>
+        </span>
+       <span @click="$store.commit('toggleCommandPallet')" class="bg-primary p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer" title="Press Ctrl + p ">
           <HelpCircleOutline fillColor="white" :size="16"/>
         </span>
       <!-- Volume button -->
@@ -71,7 +75,7 @@
           />
           <span
             @click="playPause('type')"
-            class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
+            class="cursor-pointer bg-primary p-2 bg-opacity-30 rounded-lg"
           >
             <img
               src="../assets/typing.png"
@@ -117,7 +121,7 @@
         <div class="h-16 flex justify-end align-middle relative items-center">
           <span
             @click="$store.commit('toggleIsFullScreen')"
-            class="cursor-pointer bg-gray-900 p-2 bg-opacity-30 rounded-lg"
+            class="cursor-pointer bg-primary p-2 bg-opacity-30 rounded-lg"
           >
             <img src="../assets/fullscreen.png" width="15" alt="" />
           </span>
@@ -129,10 +133,15 @@
 <script>
 import { mapState } from 'vuex';
 import HelpCircleOutline from "vue-material-design-icons/HelpCircleOutline.vue"
+import Sun  from "vue-material-design-icons/WhiteBalanceSunny.vue"
+import Moon  from "vue-material-design-icons/MoonWaningCrescent.vue"
 export default {
     name:"ToolBar",
     components:{
-    HelpCircleOutline
+    HelpCircleOutline,
+    Sun,
+    Moon
+
     },
     computed:{
       ...mapState(['primary','rain','type'])

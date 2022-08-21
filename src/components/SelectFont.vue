@@ -1,5 +1,5 @@
 <template>
-           <select  @change="$emit('setFont',selectedFont)" v-model="selectedFont" class="text-xs bg-gray-900 bg-opacity-50 rounded-lg p-2 focus:outline-none mr-2">
+           <select  @change="$emit('setFont',selectedFont)" v-model="selectedFont" class="text-xs bg-primary bg-opacity-50 rounded-lg p-2 focus:outline-none mr-2">
               <option :value="font" v-for="(font,index) in fonts" :key="index" class="" >{{font}}</option>
             </select>
 </template>

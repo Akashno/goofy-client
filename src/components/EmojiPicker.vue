@@ -25,7 +25,7 @@
             v-model="search"
             placeholder="Search for emoji ...."
             autofocus
-            class="bg-gray-800 bg-opacity-30 text-white focus:outline-none dark:text-xs"
+            class="bg-primary bg-opacity-30 text-white focus:outline-none dark:text-xs"
           />
         </div>
         <div>
