@@ -42,6 +42,7 @@
       >
     </div>
     <span
+      @click="$store.commit('toggleCommandPallet')"
       @mouseenter="showAlert = true"
       @mouseleave="showAlert = false"
       class="bg-primary p-2 rounded-lg bg-opacity-30 mr-4 cursor-pointer"
