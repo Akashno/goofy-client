@@ -26,10 +26,13 @@ export default new Vuex.Store({
       return primary.playing && primary.volume < 1 
     },
     hasValidNote(state){
-     return state.note.text.length
+     return state.note.currentNote.content.length
     },
     canToggleWithSpace(state){
       return !state.note.isOpened  && !state.isCommandPallet
+    },
+    hasAnyExistingNoteInCurrentNote(state){
+      return state.note.currentNote.id
     }
   },
   mutations: {
@@ -77,22 +80,40 @@ export default new Vuex.Store({
       note.isFullScreen= !note.isFullScreen
     },
     setNote({note},payload){
-      note.text= payload
-
+      note.currentNote.content= payload
+    },
+    setCurrentNote({note},payload){
+      if(!payload){
+        note.currentNote = null
+        return
+      }   
+      note.currentNote = payload
+    },
+    resetCurrentNote({note}){
+     note.currentNote = {...note.emptyNote}
+     note.isFocused = true
     },
     clearNote({note}){
-      note.text = ""
+      note.currentNote = {...note.emptyNote}
       note.isFocused = true
     },
     saveToNotes({note}){
-      if(note.text){
-      note.savedNotes.push({
-        title:note.text.slice(0,20),
-        content:note.text
+      if(!note.currentNote.content) return
+      if(note.currentNote.id){
+        let existingNote = note.savedNotes.findIndex(existingNote =>existingNote.id === note.currentNote.id)
+        if(existingNote.id != -1){
+          note.savedNotes[existingNote].title = note.currentNote.title || 'New note' 
+          note.savedNotes[existingNote].content = note.currentNote.content
+        }
+      }else{
+        note.savedNotes.push({
+         id:note.savedNotes.length + 1,
+        title:note.currentNote.title || "New note",
+        content:note.currentNote.content
       })
-      note.text = ""
-      note.isFocused = true
       }
+      note.currentNote = {...note.emptyNote}
+      note.isFocused = true
     },
     toggleIsSavedNotes({note}){
       if(!note.isSavedNotes){

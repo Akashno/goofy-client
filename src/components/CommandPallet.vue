@@ -1,11 +1,11 @@
 <template>
   <div
-    class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20"
+    class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20 bg-primary bg-opacity-30"
     role="dialog"
     aria-modal="true"
   >
     <div
-      class=" mx-auto max-w-xl transform overflow-hidden rounded-xl bg-gray-100 dark:bg-primary shadow-2xl transition-all"
+      class=" mx-auto max-w-xl transform overflow-hidden rounded-xl bg-gray-100 dark:bg-primary shadow-5xl transition-all"
     >
       <div class="relative">
         <svg
@@ -112,6 +112,8 @@ import Clipboard from "vue-material-design-icons/Clipboard.vue";
 import Sun from "vue-material-design-icons/WhiteBalanceSunny.vue";
 import Moon from "vue-material-design-icons/MoonWaningCrescent.vue";
 import CommandPallet from "vue-material-design-icons/AppleKeyboardCommand.vue";
+import VolumeUp from "vue-material-design-icons/VolumeHigh.vue";
+import VolumeDown from "vue-material-design-icons/VolumeLow.vue";
 
 export default {
   components: {
@@ -128,6 +130,8 @@ export default {
     Sun,
     Moon,
     CommandPallet,
+    VolumeUp,
+    VolumeDown,
   },
   data() {
     return {
@@ -272,7 +276,7 @@ export default {
               : "Rain: Mute Sound",
           func: this.muteRain,
           isActive: false,
-          icon: "cloud",
+          icon: "Cloud",
           description: "Mute the sound of raining",
           show:
             this.$store.state.rain.playing && this.$store.state.rain.volume > 0,
@@ -282,7 +286,7 @@ export default {
           title: "Song: Volume up",
           func: this.songVolumeUp,
           isActive: false,
-          icon: "cloud",
+          icon: "VolumeUp",
           description: "Increase the sound of music by 0.5",
           show: this.$store.getters.canIncreaseVolumeOfSong,
         },
@@ -291,7 +295,7 @@ export default {
           title: "Song: Volume Down",
           func: this.songVolumeDown,
           isActive: false,
-          icon: "cloud",
+          icon: "VolumeDown",
           show: this.$store.getters.canLowerVolumeOfSong,
         },
         {
@@ -303,6 +307,14 @@ export default {
           isActive: false,
           icon: this.$store.state.isDarkMode ? "Sun" : "Moon",
           show: true,
+        },
+        {
+          id: 17,
+          title: "Create : New Note",
+          func: this.resetCurrentNote,
+          isActive: false,
+          icon: this.$store.state.isDarkMode ? "Sun" : "Moon",
+          show: this.$store.getters.hasAnyExistingNoteInCurrentNote,
         },
       ],
       //hehe
@@ -316,9 +328,7 @@ export default {
     },
   },
   mounted() {
-     setTimeout(()=>{
-    this.$refs.commandInput.focus();
-     },0.1)
+        this.$refs.commandInput.focus();
     this.setFilteredCommand();
     window.addEventListener("keydown", this.setActiveCommand, {
       passive: true,
@@ -331,6 +341,9 @@ export default {
   },
 
   methods: {
+    resetCurrentNote(){
+     this.$store.commit("resetCurrentNote")
+    },
     setFilteredCommand() {
       this.filteredCommands = this.commands
         .filter((command) => {
@@ -362,6 +375,7 @@ export default {
         // Navigate on arrow up / arrow down / k / j
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
+        if(foundIndex === -1) return
         this.filteredCommands[foundIndex].isActive = false;
         if (foundIndex > 0) {
           this.filteredCommands[foundIndex - 1].isActive = true;
@@ -379,6 +393,7 @@ export default {
       if (e.key === "ArrowDown" || e.key === "j") {
         let command = this.filteredCommands.find((command) => command.isActive);
         let foundIndex = this.filteredCommands.indexOf(command);
+        if(foundIndex === -1) return
         this.filteredCommands[foundIndex].isActive = false;
         if (foundIndex + 1 < this.filteredCommands.length) {
           if (e.key === "ArrowDown" || !this.isInputFocus)
