@@ -3,7 +3,14 @@
     <router-view/>
   </div>
 </template>
-
+<script>
+export default {
+  created(){
+      let existingDarkMode = localStorage.getItem('darkMode')
+    this.$store.commit('setDarkMode',existingDarkMode)
+  }
+}
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

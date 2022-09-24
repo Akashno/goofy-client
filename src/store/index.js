@@ -15,7 +15,7 @@ export default new Vuex.Store({
 
     isCommandPallet:false,
     isFullScreen:false,
-    isDarkMode:true,
+    isDarkMode:false,
 
   },
   getters: {

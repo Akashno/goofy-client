@@ -11,7 +11,7 @@
     <CommandPallet v-if="isCommandPallet" />
     <div
       v-if="note.isOpened"
-      class="transparentNoteWrapper bg-primary bg-opacity-60 saturate-200 rounded-lg flex"
+      class="transparentNoteWrapper bg-primary bg-opacity-95 saturate-200 rounded-lg flex pb-4"
       :class="note.isFullScreen ? ` w-full h-full` : `w-64 h-64`"
     >
       <div
@@ -21,7 +21,7 @@
         v-if="note.isFullScreen"
           @mouseenter="setFileNameInput()"
           @mouseleave="leaveFileNameInput()"
-          class="py-4 text-xs text-left pl-5 pr-4 w-48  flex align-center bg-black bg-opacity-30 transition-all 3s"
+          class="py-4 text-xs text-left pl-5 pr-4 w-48  flex align-center bg-black bg-opacity-60 rounded-br-xl transition-all 3s"
         >
           <span class="mr-2">
             <span >
@@ -86,7 +86,7 @@
 
           <div class="flex align-center items-center">
             <span class="cursor-pointer bg-gray-900 bg-opacity-30 rounded-lg mr-2 p-1">
-              <History @click="toggleIsSavedNotes" class="cursor-pointer " />
+              <History @click="toggleIsSavedNotes" class="cursor-pointer " v-if="note.isFullScreen" />
             </span>
             <span
               @click="makeNoteFullScreen()"
@@ -115,11 +115,11 @@
           :key="index"
           v-show="note.isSavedNotes"
         >
-          <div class="flex p-2">
-            <span>
-              <img width="15px" src="../assets/file.png" alt="" class="mr-1" />
+          <div class="p-2 grid justify-start grid-flow-col items-center w-full">
+            <span class="w-6 col-span-1 mr-2">
+              <img src="../assets/file.png" alt="" class="contain"  />
             </span>
-            <span>
+            <span class="truncate col-span-11 ">
               {{ item.title }}
             </span>
           </div>
@@ -145,9 +145,12 @@ import FullScreen from "vue-material-design-icons/Fullscreen.vue";
 import History from "vue-material-design-icons/History.vue";
 import Plus from "vue-material-design-icons/Plus.vue";
 import { mapState } from "vuex";
+import contextMenu from 'vue-context-menu'
+
 export default {
   name: "IndexPage",
   components: {
+    contextMenu,
     Emoji,
     SelectFont,
     ToolBar,
